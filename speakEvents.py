@@ -40,8 +40,8 @@ if __name__ == '__main__':
     events = get_iccdata()
 
     if len(events) == 0:
-        talk = u"本日の予定はありません"
-        subprocess.call("atalk.sh \"" + talk + "\"", shell=True)
+        talk = u"本日の予定はありません。以上。"
+        subprocess.call("atalk.sh -s 110 \"" + talk + "\"", shell=True)
         quit()
 
     for event in events:
@@ -52,19 +52,23 @@ if __name__ == '__main__':
                 else:
                     eventTime =  str(value[4]) + u"時" + str(value[5]) + u"分から"
 
-                print eventTime
-                subprocess.call("atalk.sh \"" + eventTime + "\"", shell=True)
+                #print eventTime
+                subprocess.call("atalk.sh -s 100 \"" + eventTime + "\"", shell=True)
 
             if key == "endDate":
                 if value[4] == 0 and value[5] == 0:
                     pass
                 else:
                     eventEndTime =  str(value[4]) + u"時" + str(value[5]) + u"分まで"
-                    print eventEndTime
+                    #print eventEndTime
                     subprocess.call("atalk.sh \"" + eventEndTime + "\"", shell=True)
 
             if key == "title":
                 eventTitle = value + u"の予定があります"
-                print eventTitle
-                subprocess.call("atalk.sh \"" + eventTitle + "\"", shell=True)
-                time.sleep(2)
+                #print eventTitle
+                subprocess.call("atalk.sh -s 110 \"" + eventTitle + "\"", shell=True)
+                time.sleep(1)
+
+        endTalk=u"忘れ物はありませんか？ 以上。"
+        #print endTalk
+        subprocess.call("atalk.sh -s 100 \"" + endTalk + "\"", shell=True)
