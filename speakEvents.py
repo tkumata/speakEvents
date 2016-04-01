@@ -40,35 +40,36 @@ if __name__ == '__main__':
     events = get_iccdata()
 
     if len(events) == 0:
+        # 一日分のイベントが空
         talk = u"本日の予定はありません。以上。"
         subprocess.call("atalk.sh -s 120 \"" + talk + "\"", shell=True)
         quit()
+    else:
+        # 一日分のループ
+        for event in events:
+            # 個別イベント毎のループ
+            for key,value in event.items():
+                if key == "startDate":
+                    if value[4] == 0 and value[5] == 0:
+                        eventTime =  u"終日"
+                    else:
+                        eventTime =  str(value[4]) + u"時" + str(value[5]) + u"分から"
 
-    for event in events:
-        for key,value in event.items():
-            if key == "startDate":
-                if value[4] == 0 and value[5] == 0:
-                    eventTime =  u"終日"
-                else:
-                    eventTime =  str(value[4]) + u"時" + str(value[5]) + u"分から"
+                    subprocess.call("atalk.sh -s 120 \"" + eventTime + "\"", shell=True)
 
-                #print eventTime
-                subprocess.call("atalk.sh -s 120 \"" + eventTime + "\"", shell=True)
+                if key == "endDate":
+                    if value[4] == 0 and value[5] == 0:
+                        eventEndTime =  u"に"
+                    else:
+                        eventEndTime =  str(value[4]) + u"時" + str(value[5]) + u"分まで"
 
-            if key == "endDate":
-                if value[4] == 0 and value[5] == 0:
-                    pass
-                else:
-                    eventEndTime =  str(value[4]) + u"時" + str(value[5]) + u"分まで"
-                    #print eventEndTime
                     subprocess.call("atalk.sh -s 120 \"" + eventEndTime + "\"", shell=True)
 
-            if key == "title":
-                eventTitle = value + u"の予定があります"
-                #print eventTitle
-                subprocess.call("atalk.sh -s 100 \"" + eventTitle + "\"", shell=True)
-                time.sleep(1)
+                if key == "title":
+                    eventTitle = value + u"の予定があります"
+                    subprocess.call("atalk.sh -s 100 \"" + eventTitle + "\"", shell=True)
+                    time.sleep(1)
 
-    endTalk=u"忘れ物はありませんか？ 以上。"
-    #print endTalk
-    subprocess.call("atalk.sh -s 110 \"" + endTalk + "\"", shell=True)
+        # 一日分のループが終了したら
+        endTalk=u"忘れ物はありませんか？　以上。"
+        subprocess.call("atalk.sh -s 110 \"" + endTalk + "\"", shell=True)
