@@ -46,7 +46,7 @@ if __name__ == '__main__':
         subprocess.call("atalk.sh -s 120 \"" + talk + "\"", shell=True)
         quit()
     else:
-        events2 = sorted(events, key=lambda x:x['startDate'])
+        events2 = sorted(events, key=lambda x:x['startDate'])    # sort by startDate
         # 一日分のループ
         for event in events2:
             # 個別イベントのループ
