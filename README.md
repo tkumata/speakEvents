@@ -13,12 +13,12 @@ Raspberry Pi に BLE やタクトスイッチなどの何かしらのアクシ�
 ## 導入
 1. sudo pip install pyicloud
 2. Download AquesTalkPi and unzip.
-3. vi atalk.sh
+3. Create wrapper (eg, vi atalk.sh).
 4. Download speakEvent.py (this script).
 5. touch ~/.pyicloud && chmod 600 ~/.pyicloud && vi ~/.pyicloud
 6. Adjust speakEvent.py (eg, path etc...)
 
-.pyicloud format
+- .pyicloud format
 ```
 [account]
 user = your apple id
