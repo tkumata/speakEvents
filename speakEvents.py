@@ -56,13 +56,14 @@ if __name__ == '__main__':
                         eventTime =  u"終日"
                     else:
                         eventTime =  str(value[4]) + u"時" + str(value[5]) + u"分から"
-                    print eventTime
+                    print eventTime,
                     subprocess.call("atalk.sh -s 120 \"" + eventTime + "\"", shell=True)
                 if key == "endDate":
                     if value[4] == 0 and value[5] == 0:
                         eventEndTime =  u"に"
                     else:
                         eventEndTime =  str(value[4]) + u"時" + str(value[5]) + u"分まで"
+                    print eventEndTime,
                     subprocess.call("atalk.sh -s 120 \"" + eventEndTime + "\"", shell=True)
                 if key == "title":
                     eventTitle = value + u"の予定があります"
