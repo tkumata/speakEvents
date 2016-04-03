@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 from pyicloud import PyiCloudService    # pip install pyicloud
+from ConfigParser import SafeConfigParser
+from pprint import pprint
 import datetime
 import locale
 import json
 import subprocess
 import time
 import os
-from ConfigParser import SafeConfigParser
-from pprint import pprint
+import distutils.spawn
 
 #
 # touch ~/.pyicloud
@@ -20,20 +21,19 @@ from pprint import pprint
 #
 homeDir = os.path.expanduser("~")
 filename = homeDir + '/.pyicloud'
+
 if os.path.isfile(filename):
     parser = SafeConfigParser()
     parser.read(filename)
+    userid = parser.get('account', 'user')
+    assert isinstance(userid, str)
+    passwd = parser.get('account', 'pass')
+    assert isinstance(passwd, str)
+    api = PyiCloudService(userid, passwd)
+    d = datetime.datetime.today()
 else:
     print u"config file not found."
     quit()
-
-userid = parser.get('account', 'user')
-assert isinstance(userid, str)
-passwd = parser.get('account', 'pass')
-assert isinstance(passwd, str)
-
-api = PyiCloudService(userid, passwd)
-d = datetime.datetime.today()
 
 def get_iccdata():
     from_dt = datetime.datetime(d.year, d.month, d.day)
