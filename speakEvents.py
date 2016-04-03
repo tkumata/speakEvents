@@ -20,8 +20,12 @@ from pprint import pprint
 #
 homeDir = os.path.expanduser("~")
 filename = homeDir + '/.pyicloud'
-parser = SafeConfigParser()
-parser.read(filename)
+if os.path.isfile(filename):
+    parser = SafeConfigParser()
+    parser.read(filename)
+else:
+    print u"config file not found."
+    quit()
 
 userid = parser.get('account', 'user')
 assert isinstance(userid, str)
