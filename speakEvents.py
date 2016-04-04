@@ -15,13 +15,13 @@ import platform
 # check text speaker
 if platform.system() == "Linux":
     if spawn.find_executable('atalk.sh'):
-        speaker = "atalk.sh"
+        speaker = "atalk.sh -s"
     else:
         print u"text speaker atalk.sh not found."
         quit()
 elif platform.system() == "Darwin":
     if spawn.find_executable('say'):
-        speaker = "say"
+        speaker = "say -r"
     else:
         print u"text speaker say not found."
         quit()
@@ -65,7 +65,7 @@ if __name__ == '__main__':
     if len(events) == 0:
         # 一日分のイベントが空
         talk = u"本日の予定はありません。以上"
-        subprocess.call(speaker + " -s 120 \"" + talk + "\"", shell=True)
+        subprocess.call(speaker + " 120 \"" + talk + "\"", shell=True)
         quit()
     else:
         events2 = sorted(events, key=lambda x:x['startDate'])    # sort by startDate
@@ -79,7 +79,7 @@ if __name__ == '__main__':
                     else:
                         eventTime = str(value[4]) + u"時" + str(value[5]) + u"分から"
                     print eventTime,
-                    subprocess.call(speaker + " -s 130 \"" + eventTime + "\"", shell=True)
+                    subprocess.call(speaker + " 130 \"" + eventTime + "\"", shell=True)
 
                 if key == "endDate":
                     if value[4] == 0 and value[5] == 0:
@@ -87,16 +87,16 @@ if __name__ == '__main__':
                     else:
                         eventEndTime = str(value[4]) + u"時" + str(value[5]) + u"分まで、"
                     print eventEndTime,
-                    subprocess.call(speaker + " -s 130 \"" + eventEndTime + "\"", shell=True)
+                    subprocess.call(speaker + " 130 \"" + eventEndTime + "\"", shell=True)
 
                 if key == "title":
                     eventTitle = value + u"の予定があります。"
                     print eventTitle
-                    subprocess.call(speaker + " -s 100 \"" + eventTitle + "\"", shell=True)
+                    subprocess.call(speaker + " 100 \"" + eventTitle + "\"", shell=True)
                     time.sleep(1)
             # End for
         # End for
         # 一日分のループが終了したら
         endTalk = u"忘れ物はありませんか？。以上"
-        subprocess.call(speaker + " -s 120 \"" + endTalk + "\"", shell=True)
+        subprocess.call(speaker + " 120 \"" + endTalk + "\"", shell=True)
     # End if
