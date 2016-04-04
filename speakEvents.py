@@ -12,6 +12,9 @@ import time
 import os
 import platform
 
+# date time
+d = datetime.datetime.today()
+
 # check text speaker
 if platform.system() == "Linux":
     if spawn.find_executable('atalk.sh'):
@@ -46,7 +49,6 @@ if os.path.isfile(filename):
     passwd = parser.get('account', 'pass')
     assert isinstance(passwd, str)
     api = PyiCloudService(userid, passwd)
-    d = datetime.datetime.today()
 else:
     print u"config file not found."
     quit()
