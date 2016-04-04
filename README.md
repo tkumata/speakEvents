@@ -18,6 +18,21 @@ Raspberry Pi に BLE やタクトスイッチなどの何かしらのアクシ�
 5. touch ~/.pyicloud && chmod 600 ~/.pyicloud && vi ~/.pyicloud
 6. Adjust speakEvent.py (eg, path etc...)
 
+- example atalk.sh
+```
+#!/bin/bash
+aquestalkpi=/home/pi/bin/aquestalkpi/AquesTalkPi
+var=`$aquestalkpi "$@" | base64; echo ":${PIPESTATUS[0]}"`
+ret=(${var##*:})
+data=${var%:*}
+if [ $ret -eq 0 ]; then
+  echo $data | base64 --decode --ignore-garbage | aplay -q
+else
+  echo $data | base64 --decode --ignore-garbage
+  exit $ret
+fi
+```
+
 - .pyicloud format
 ```
 [account]
