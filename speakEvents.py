@@ -116,22 +116,20 @@ def speakEvents():
 # main
 #
 if __name__ == '__main__':
-    try:
-        while True:
+    while True:
+        try:
             GPIO.wait_for_edge(IO_NO4, GPIO.FALLING)
+            #speakEvents()
             print u"4"
-            speakEvents()
-            time.sleep(1)
-    except KeyboardInterrupt:
-        GPIO.cleanup()  # clean up GPIO on CTRL+C exit
 
-    try:
-        while True:
             GPIO.wait_for_edge(IO_NO5, GPIO.FALLING)
-            print u"5"
+            #mplayer on
             #GPIO.outpu(IO_NO5, GPIO.LOW)
+            print u"5"
+
             time.sleep(1)
-    except KeyboardInterrupt:
-        GPIO.cleanup()  # clean up GPIO on CTRL+C exit
+
+        except KeyboardInterrupt:
+            GPIO.cleanup()  # clean up GPIO on CTRL+C exit
 
     GPIO.cleanup()
