@@ -11,20 +11,27 @@ import subprocess
 import time
 import os
 import platform
+import daemon
+import RPi.GPIO as GPIO
+
+# GPIO init.
+IO_NO = 4
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(IO_NO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # date time
 d = datetime.datetime.today()
 
 # check text speaker
 if platform.system() == "Linux":
-    if spawn.find_executable('atalk.sh'):
-        speaker = "atalk.sh -s"
+    if spawn.find_executable('/home/pi/bin/atalk.sh'):
+        speaker = "/home/pi/bin/atalk.sh -s"
     else:
         print u"text speaker atalk.sh not found."
         quit()
 elif platform.system() == "Darwin":
-    if spawn.find_executable('say'):
-        speaker = "say -r"
+    if spawn.find_executable('/usr/bin/say'):
+        speaker = "/usr/bin/say -r"
     else:
         print u"text speaker say not found."
         quit()
@@ -53,15 +60,13 @@ else:
     print u"config file not found."
     quit()
 
-# get calendar data
 def get_iccdata():
     from_dt = datetime.datetime(d.year, d.month, d.day)
     to_dt = datetime.datetime(d.year, d.month, d.day)
     iccEvent = api.calendar.events(from_dt, to_dt)
     return iccEvent
 
-# main
-if __name__ == '__main__':
+def speakEvents():
     events = get_iccdata()
 
     if len(events) == 0:
@@ -80,7 +85,7 @@ if __name__ == '__main__':
                         eventTime = u"終日"
                     else:
                         eventTime = str(value[4]) + u"時" + str(value[5]) + u"分から"
-                    print eventTime,
+                    #print eventTime,
                     subprocess.call(speaker + " 130 \"" + eventTime + "\"", shell=True)
 
                 if key == "endDate":
@@ -88,12 +93,12 @@ if __name__ == '__main__':
                         eventEndTime = u"に、"
                     else:
                         eventEndTime = str(value[4]) + u"時" + str(value[5]) + u"分まで、"
-                    print eventEndTime,
+                    #print eventEndTime,
                     subprocess.call(speaker + " 130 \"" + eventEndTime + "\"", shell=True)
 
                 if key == "title":
                     eventTitle = value + u"の予定があります。"
-                    print eventTitle
+                    #print eventTitle
                     subprocess.call(speaker + " 100 \"" + eventTitle + "\"", shell=True)
                     time.sleep(1)
             # End for
@@ -102,3 +107,15 @@ if __name__ == '__main__':
         endTalk = u"忘れ物はありませんか？。以上"
         subprocess.call(speaker + " 120 \"" + endTalk + "\"", shell=True)
     # End if
+
+#
+# main
+#
+if __name__ == '__main__':
+    try:
+        while True:
+            GPIO.wait_for_edge(IO_NO, GPIO.FALLING)
+            speakEvents()
+    except KeyboardInterrupt:
+        GPIO.cleanup()  # clean up GPIO on CTRL+C exit
+    GPIO.cleanup()
