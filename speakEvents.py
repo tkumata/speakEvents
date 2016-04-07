@@ -15,9 +15,13 @@ import daemon
 import RPi.GPIO as GPIO
 
 # GPIO init.
-IO_NO = 4
+IO_NO4 = 4
+IO_NO5 = 5
+
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(IO_NO, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+GPIO.setup(IO_NO4, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(IO_NO5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # date time
 d = datetime.datetime.today()
@@ -113,9 +117,23 @@ def speakEvents():
 #
 if __name__ == '__main__':
     try:
+        GPIO.wait_for_edge(IO_NO4, GPIO.FALLING)
         while True:
-            GPIO.wait_for_edge(IO_NO, GPIO.FALLING)
-            speakEvents()
+            if GPIO.input(6) == 1:
+                speakEvents()
+                GPIO.outpu(IO_NO4, GPIO.LOW)
+            time.sleep(1)
     except KeyboardInterrupt:
         GPIO.cleanup()  # clean up GPIO on CTRL+C exit
+
+    try:
+        GPIO.wait_for_edge(IO_NO5, GPIO.FALLING)
+        while True:
+            if GPIO.input(6) == 1:
+                #GPIO.outpu(IO_NO5, GPIO.LOW)
+                pass
+            time.sleep(1)
+    except KeyboardInterrupt:
+        GPIO.cleanup()  # clean up GPIO on CTRL+C exit
+
     GPIO.cleanup()
