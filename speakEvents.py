@@ -117,21 +117,19 @@ def speakEvents():
 #
 if __name__ == '__main__':
     try:
-        GPIO.wait_for_edge(IO_NO4, GPIO.FALLING)
         while True:
-            if GPIO.input(6) == 1:
-                speakEvents()
-                GPIO.outpu(IO_NO4, GPIO.LOW)
+            GPIO.wait_for_edge(IO_NO4, GPIO.FALLING)
+            print u"4"
+            speakEvents()
             time.sleep(1)
     except KeyboardInterrupt:
         GPIO.cleanup()  # clean up GPIO on CTRL+C exit
 
     try:
-        GPIO.wait_for_edge(IO_NO5, GPIO.FALLING)
         while True:
-            if GPIO.input(6) == 1:
-                #GPIO.outpu(IO_NO5, GPIO.LOW)
-                pass
+            GPIO.wait_for_edge(IO_NO5, GPIO.FALLING)
+            print u"5"
+            #GPIO.outpu(IO_NO5, GPIO.LOW)
             time.sleep(1)
     except KeyboardInterrupt:
         GPIO.cleanup()  # clean up GPIO on CTRL+C exit
