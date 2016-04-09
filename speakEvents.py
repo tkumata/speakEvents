@@ -7,9 +7,10 @@ from distutils import spawn
 import datetime
 import locale
 import json
-import subprocess
+import subprocess, signal
 import time
 import os
+import sys
 import platform
 import grovepi
 
@@ -34,6 +35,24 @@ elif platform.system() == "Darwin":
         print u"text speaker say not found."
         quit()
 
+def afn360():
+    foundMplayer = 0
+    ps = subprocess.Popen('ps -A', stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=True)
+    out = ps.communicate()[0]
+
+    for line in out.splitlines():
+        if 'mplayer' in line:
+            print("found mplayer.")
+            foundMplayer = 1
+            pid = int(line.split(None, 1)[0])
+            os.kill(pid, signal.SIGKILL)
+        else:
+            pass
+
+    if foundMplayer == 0:
+        print("start AFN Tokyo.")
+        subprocess.Popen("nohup mplayer http://13743.live.streamtheworld.com/AFNP_TKO > /dev/null 2>&1 &", shell=True)
+
 # check config file
 #
 # touch ~/.pyicloud && chmod 600 ~/.pyicloud && vi ~/.pyicloud
@@ -42,10 +61,11 @@ elif platform.system() == "Darwin":
 #pass = your appleid password
 #
 homeDir = os.path.expanduser("~")
-filename = homeDir + '/.pyicloud'
 lockFile = "lockfile"
 
 def get_api():
+    filename = homeDir + '/.pyicloud'
+
     if os.path.isfile(filename):
         parser = SafeConfigParser()
         parser.read(filename)
@@ -118,7 +138,7 @@ def speakEvents():
             # End for
         # End for
         # 一日分のループが終了したら
-        endTalk = u"忘れ物はありませんか？。以上"
+        endTalk = u"忘れ物はありませんか。以上"
         subprocess.call(speaker + " 120 \"" + endTalk + "\"", shell=True)
     # End if
     os.remove(lockFile)
@@ -138,8 +158,10 @@ if __name__ == '__main__':
                     print("locking...")
 
             if grovepi.digitalRead(button3) == 1:
+                print("push D3")
+
                 if not os.path.exists(lockFile):
-                    print("push D3")
+                    afn360()
                 else:
                     print("locking...")
 

@@ -3,7 +3,9 @@
 ## 説明
 Raspberry Pi に BLE やタクトスイッチなどの何かしらのアクションがあった時、iCloud から当日の予定を取得し声でお知らせします。声でお知らせしてくれるので、朝、何かしながら予定の確認をすることができます。
 
-※アクション部分は各自で作ってください。
+ProvePi+ の D2 は iCloud Calendar を読み上げます。
+
+ProvePi+ の D3 は AFN Toyko を再生します。再生中だった場合、停止します。
 
 ## 必要なもの
 1. pyicloud
@@ -11,6 +13,7 @@ Raspberry Pi に BLE やタクトスイッチなどの何かしらのアクシ�
 3. wrapper of AquesTalkPi (eg, atalk.sh)
 
 ## 導入
+0. ProvePi+
 1. sudo pip install pyicloud
 2. Download AquesTalkPi and unzip.
 3. Create wrapper (eg, vi atalk.sh).
