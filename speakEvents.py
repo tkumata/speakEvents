@@ -43,6 +43,7 @@ elif platform.system() == "Darwin":
 #
 homeDir = os.path.expanduser("~")
 filename = homeDir + '/.pyicloud'
+lockFile = "lockfile"
 
 def get_api():
     if os.path.isfile(filename):
@@ -78,13 +79,15 @@ def get_iccdata():
         quit()
 
 def speakEvents():
+    f = open(lockFile, "w")
+    f.close()
+
     events = get_iccdata()
 
     if len(events) == 0:
         # 一日分のイベントが空
         talk = u"本日の予定はありません。以上"
         subprocess.call(speaker + " 120 \"" + talk + "\"", shell=True)
-        quit()
     else:
         events2 = sorted(events, key=lambda x:x['startDate'])    # sort by startDate
         # 一日分のループ
@@ -118,6 +121,7 @@ def speakEvents():
         endTalk = u"忘れ物はありませんか？。以上"
         subprocess.call(speaker + " 120 \"" + endTalk + "\"", shell=True)
     # End if
+    os.remove(lockFile)
 
 #
 # main
@@ -127,10 +131,17 @@ if __name__ == '__main__':
         try:
             if grovepi.digitalRead(button2) == 1:
                 print("push D2")
-                speakEvents()
+
+                if not os.path.exists(lockFile):
+                    speakEvents()
+                else:
+                    print("locking...")
 
             if grovepi.digitalRead(button3) == 1:
-                print("push D3")
+                if not os.path.exists(lockFile):
+                    print("push D3")
+                else:
+                    print("locking...")
 
             time.sleep(.5)
 
