@@ -11,20 +11,14 @@ import subprocess
 import time
 import os
 import platform
-import daemon
-import RPi.GPIO as GPIO
+import grovepi
 
 # GPIO init.
-IO_NO4 = 4
-IO_NO5 = 5
+button2 = 2
+button3 = 3
 
-GPIO.setmode(GPIO.BCM)
-
-GPIO.setup(IO_NO4, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(IO_NO5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-# date time
-d = datetime.datetime.today()
+grovepi.pinMode(button2, "INPUT")
+grovepi.pinMode(button3, "INPUT")
 
 # check text speaker
 if platform.system() == "Linux":
@@ -42,9 +36,7 @@ elif platform.system() == "Darwin":
 
 # check config file
 #
-# touch ~/.pyicloud
-# chmod 600 ~/.pyicloud
-# vi ~/.pyicloud
+# touch ~/.pyicloud && chmod 600 ~/.pyicloud && vi ~/.pyicloud
 #[account]
 #user = your appleid
 #pass = your appleid password
@@ -52,23 +44,38 @@ elif platform.system() == "Darwin":
 homeDir = os.path.expanduser("~")
 filename = homeDir + '/.pyicloud'
 
-if os.path.isfile(filename):
-    parser = SafeConfigParser()
-    parser.read(filename)
-    userid = parser.get('account', 'user')
-    assert isinstance(userid, str)
-    passwd = parser.get('account', 'pass')
-    assert isinstance(passwd, str)
-    api = PyiCloudService(userid, passwd)
-else:
-    print u"config file not found."
-    quit()
+def get_api():
+    if os.path.isfile(filename):
+        parser = SafeConfigParser()
+        parser.read(filename)
+
+        userid = parser.get('account', 'user')
+        assert isinstance(userid, str)
+
+        passwd = parser.get('account', 'pass')
+        assert isinstance(passwd, str)
+
+        api = PyiCloudService(userid, passwd)
+
+        return api
+    else:
+        print u"config file not found."
+        quit()
 
 def get_iccdata():
-    from_dt = datetime.datetime(d.year, d.month, d.day)
-    to_dt = datetime.datetime(d.year, d.month, d.day)
-    iccEvent = api.calendar.events(from_dt, to_dt)
-    return iccEvent
+    api = get_api()
+
+    if not api == "":
+        d = datetime.datetime.today()
+        from_dt = datetime.datetime(d.year, d.month, d.day)
+        to_dt = datetime.datetime(d.year, d.month, d.day)
+
+        iccEvent = api.calendar.events(from_dt, to_dt)
+
+        return iccEvent
+    else:
+        print("api is null.")
+        quit()
 
 def speakEvents():
     events = get_iccdata()
@@ -118,18 +125,14 @@ def speakEvents():
 if __name__ == '__main__':
     while True:
         try:
-            GPIO.wait_for_edge(IO_NO4, GPIO.FALLING)
-            #speakEvents()
-            print u"4"
+            if grovepi.digitalRead(button2) == 1:
+                print("push D2")
+                speakEvents()
 
-            GPIO.wait_for_edge(IO_NO5, GPIO.FALLING)
-            #mplayer on
-            #GPIO.outpu(IO_NO5, GPIO.LOW)
-            print u"5"
+            if grovepi.digitalRead(button3) == 1:
+                print("push D3")
 
-            time.sleep(1)
+            time.sleep(.5)
 
-        except KeyboardInterrupt:
-            GPIO.cleanup()  # clean up GPIO on CTRL+C exit
-
-    GPIO.cleanup()
+        except IOError:
+            print ("Error")
