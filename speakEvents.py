@@ -42,7 +42,7 @@ def afn360():
 
     for line in out.splitlines():
         if 'mplayer' in line:
-            print("found mplayer.")
+            print("stop AFN Tokyo.")
             foundMplayer = 1
             pid = int(line.split(None, 1)[0])
             os.kill(pid, signal.SIGKILL)
@@ -51,7 +51,8 @@ def afn360():
 
     if foundMplayer == 0:
         print("start AFN Tokyo.")
-        subprocess.Popen("nohup mplayer http://13743.live.streamtheworld.com/AFNP_TKO > /dev/null 2>&1 &", shell=True)
+#        subprocess.Popen("nohup mplayer http://13743.live.streamtheworld.com/AFNP_TKO > /dev/null 2>&1 &", shell=True)
+        subprocess.Popen(["nohup", "mplayer", "http://13743.live.streamtheworld.com/AFNP_TKO"], stdout=open('/dev/null', 'w'), stderr=open('logfile.log', 'a'), preexec_fn=os.setpgrp)
 
 # check config file
 #
