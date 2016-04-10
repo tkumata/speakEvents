@@ -11,6 +11,7 @@ import subprocess, signal
 import time
 import os, sys
 import platform
+import daemon
 import grovepi
 
 homeDir = os.path.expanduser("~")
@@ -54,9 +55,9 @@ def afn360():
 
     if foundMplayer == 0:
         print("start AFN.")
-        subprocess.Popen(["nohup", "mplayer", "http://13743.live.streamtheworld.com/AFNP_TKO"], stdout=open('/dev/null', 'w'), stderr=open('speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
+        subprocess.Popen(["nohup", "mplayer", "http://13743.live.streamtheworld.com/AFNP_TKO"], stdout=open('/dev/null', 'w'), stderr=open('/tmp/speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
     else:
-        os.remove('speakEventsMplayer.log')
+        os.remove('/tmp/speakEventsMplayer.log')
 
 # check config file
 #
@@ -65,9 +66,9 @@ def afn360():
 #user = your appleid
 #pass = your appleid password
 #
-lockFile = "lockfile"
+lockFile = "/tmp/speakEventsLockfile"
 def get_api():
-    filename = homeDir + '/.pyicloud'
+    filename = '/home/pi/.pyicloud'
 
     if os.path.isfile(filename):
         parser = SafeConfigParser()
@@ -84,7 +85,6 @@ def get_api():
         return api
     else:
         print u"config file not found."
-        quit()
 
 def get_iccdata():
     api = get_api()
@@ -168,7 +168,7 @@ if __name__ == '__main__':
                 else:
                     print("locking...")
 
-            time.sleep(.5)
+            time.sleep(.3)
 
         except IOError:
-            print ("Error")
+            print("Error")
