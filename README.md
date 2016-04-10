@@ -2,39 +2,40 @@
 
 
 ## 説明
-Raspberry Pi 3 に BLE やタクトスイッチなどの何かしらのアクションがあった時、iCloud から当日の予定を取得し声でお知らせします。声でお知らせしてくれるので、朝、何かしながら予定の確認をすることができます。
+Raspberry Pi 3 に BLE やタクトスイッチなどから何かしらのアクションがあった時、iCloud から当日の予定を取得し音声でお知らせします。音声なので忙しい時でも、何かしながら予定の確認をすることができます。
 
-GrovePi+ の D2 port は iCloud Calendar を読み上げます。
+今回はアクションとして、お気楽極楽に GrovePi+ を使うことにしました。GrovePi+ の D2 port のボタンは iCloud Calendar を読み上げます。同 D3 は AFN Toyko を再生します。再生中だった場合、停止します。
 
-GrovePi+ の D3 port は AFN Toyko を再生します。再生中だった場合、停止します。
+Raspberry Pi 3 を再起動してもこのプログラムが動くように sh を追加しました。なのでこれ単体で機能します。
 
-RPi3 を再起動してもこのプログラムが動くように sh 追加しました。これで単体で機能します。
+![the thing](images/IMG_0047.png)
 
 
 ## 必要なハード
-1. Raspberry Pi 3
+1. Raspberry Pi (Well, I use Raspberry Pi 3.)
 2. GrovePi+
-3. Two buttons (Connect D2 and D3)
+3. Two buttons for Grove
 
 
 ## 必要なソフト
-1. OS: Raspbian for robots
-2. Python module: pyicloud
-3. AquesTalkPi
+1. Raspbian for Robots (RPi3 と素の Raspbian だと Grove の反応が超絶イマイチです。粗悪品のボタンを掴んだか？って勘違いするほどです。ハマりました。RPi3 を使うなら OS は Raspbian for Robots がオススメです。RPi2 は分かりません。)
+2. Python module の pyicloud
+3. テキスト読み上げソフトとして AquesTalkPi
 4. wrapper of AquesTalkPi (eg, atalk.sh)
 
 
 ## 導入
 1. sudo pip install pyicloud
-2. Download AquesTalkPi and unzip.
+2. Download AquesTalkPi.zip and unzip.
 3. Create wrapper (eg, vi atalk.sh).
 4. git clone git@github.com:tkumata/speakEvents.git.
 5. touch /home/pi/.pyicloud && chmod 600 /home/pi/.pyicloud && vi /home/pi/.pyicloud
-6. Adjust speakEvent.py (eg, path etc...)
-7. sudo cp speakEventsService.sh /etc/init.d/
+6. Adjust "speakEvent.py" (eg, path etc...)
+7. Copy "speakEventsService.sh" to /etc/init.d
 
 
 - example atalk.sh
+
 ```
 #!/bin/bash
 aquestalkpi=/home/pi/bin/aquestalkpi/AquesTalkPi
@@ -51,9 +52,10 @@ fi
 
 
 - /home/pi/.pyicloud format
+
 ```
 [account]
-user = your apple id
+user = yourappleid@example.com
 pass = your apple id password
 ```
 
