@@ -9,12 +9,13 @@ import locale
 import json
 import subprocess, signal
 import time
-import os
-import sys
+import os, sys
 import platform
 import grovepi
 
-# GPIO init.
+homeDir = os.path.expanduser("~")
+
+# Port init.
 button2 = 2
 button3 = 3
 
@@ -26,33 +27,36 @@ if platform.system() == "Linux":
     if spawn.find_executable('/home/pi/bin/atalk.sh'):
         speaker = "/home/pi/bin/atalk.sh -s"
     else:
-        print u"text speaker atalk.sh not found."
+        print("atalk.sh がありません。")
         quit()
 elif platform.system() == "Darwin":
     if spawn.find_executable('/usr/bin/say'):
         speaker = "/usr/bin/say -r"
     else:
-        print u"text speaker say not found."
+        print("say がありません。")
         quit()
 
+# AFN360 procedure
 def afn360():
     foundMplayer = 0
     ps = subprocess.Popen('ps -A', stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=True)
     out = ps.communicate()[0]
 
+    # if this founds mplayer, kill mplayer and turn on flag.
     for line in out.splitlines():
         if 'mplayer' in line:
-            print("stop AFN Tokyo.")
             foundMplayer = 1
+            print("stop AFN.")
             pid = int(line.split(None, 1)[0])
             os.kill(pid, signal.SIGKILL)
         else:
             pass
 
     if foundMplayer == 0:
-        print("start AFN Tokyo.")
-#        subprocess.Popen("nohup mplayer http://13743.live.streamtheworld.com/AFNP_TKO > /dev/null 2>&1 &", shell=True)
-        subprocess.Popen(["nohup", "mplayer", "http://13743.live.streamtheworld.com/AFNP_TKO"], stdout=open('/dev/null', 'w'), stderr=open('logfile.log', 'a'), preexec_fn=os.setpgrp)
+        print("start AFN.")
+        subprocess.Popen(["nohup", "mplayer", "http://13743.live.streamtheworld.com/AFNP_TKO"], stdout=open('/dev/null', 'w'), stderr=open('speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
+    else:
+        os.remove('speakEventsMplayer.log')
 
 # check config file
 #
@@ -61,9 +65,7 @@ def afn360():
 #user = your appleid
 #pass = your appleid password
 #
-homeDir = os.path.expanduser("~")
 lockFile = "lockfile"
-
 def get_api():
     filename = homeDir + '/.pyicloud'
 
