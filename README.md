@@ -7,6 +7,8 @@ ProvePi+ の D2 は iCloud Calendar を読み上げます。
 
 ProvePi+ の D3 は AFN Toyko を再生します。再生中だった場合、停止します。
 
+RPi3 を再起動してもこのプログラムが動くように sh 追加しました。これで単体で機能します。今後はどうやって AFN のその他のチャンネルを呼び出すかやります。
+
 ## 必要なもの
 1. pyicloud
 2. AquesTalkPi
@@ -18,8 +20,9 @@ ProvePi+ の D3 は AFN Toyko を再生します。再生中だった場合、�
 2. Download AquesTalkPi and unzip.
 3. Create wrapper (eg, vi atalk.sh).
 4. Download speakEvent.py (this script).
-5. touch ~/.pyicloud && chmod 600 ~/.pyicloud && vi ~/.pyicloud
+5. touch /home/pi/.pyicloud && chmod 600 /home/pi/.pyicloud && vi /home/pi/.pyicloud
 6. Adjust speakEvent.py (eg, path etc...)
+7. sudo cp speakEventsService.sh /etc/init.d/
 
 - example atalk.sh
 ```
@@ -36,7 +39,7 @@ else
 fi
 ```
 
-- .pyicloud format
+- /home/pi/.pyicloud format
 ```
 [account]
 user = your apple id
