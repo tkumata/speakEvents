@@ -31,7 +31,8 @@ Raspberry Pi 3 を再起動してもこのプログラムが動くように sh �
 4. git clone git@github.com:tkumata/speakEvents.git.
 5. touch /home/pi/.pyicloud && chmod 600 /home/pi/.pyicloud && vi /home/pi/.pyicloud
 6. Adjust "speakEvent.py" (eg, path etc...)
-7. Copy "speakEventsService.sh" to /etc/init.d
+7. sudo cp speakEventsService.sh /etc/init.d/
+8. sudo update-rc.d speakEventsService.sh defaults
 
 
 - example atalk.sh
