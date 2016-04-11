@@ -99,7 +99,7 @@ def get_iccdata():
         return iccEvent
     else:
         print("api is null.")
-        quit()
+        # quit()
 
 def speakEvents():
     f = open(lockFile, "w")

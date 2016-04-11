@@ -1,5 +1,3 @@
-#!/bin/sh
-
 ### BEGIN INIT INFO
 # Provides:          speakEvens
 # Required-Start:    $remote_fs $syslog
@@ -9,6 +7,8 @@
 # Short-Description: Put a short description of the service here
 # Description:       Put a long description of the service here
 ### END INIT INFO
+
+#!/bin/sh
 
 # Change the next 3 lines to suit where you install your script and what you want to call it
 DIR=/home/pi/bin/speakEvents
