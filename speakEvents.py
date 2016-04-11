@@ -67,9 +67,8 @@ def afn360():
 #pass = your appleid password
 #
 lockFile = "/tmp/speakEventsLockfile"
+filename = '/home/pi/.pyicloud'
 def get_api():
-    filename = '/home/pi/.pyicloud'
-
     if os.path.isfile(filename):
         parser = SafeConfigParser()
         parser.read(filename)
