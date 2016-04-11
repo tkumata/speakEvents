@@ -29,13 +29,13 @@ if platform.system() == "Linux":
         speaker = "/home/pi/bin/atalk.sh -s"
     else:
         print("atalk.sh がありません。")
-        quit()
+        # quit()
 elif platform.system() == "Darwin":
     if spawn.find_executable('/usr/bin/say'):
         speaker = "/usr/bin/say -r"
     else:
         print("say がありません。")
-        quit()
+        # quit()
 
 # AFN360 procedure
 def afn360():
