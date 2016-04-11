@@ -18,7 +18,7 @@ Raspberry Pi 3 を再起動してもこのプログラムが動くように sh �
 
 
 ## 必要なソフト
-1. Raspbian for Robots (RPi3 と素の Raspbian だと Grove の反応が超絶イマイチです。粗悪品のボタンを掴んだか？って勘違いするほどです。ハマりました。RPi3 を使うなら OS は Raspbian for Robots がオススメです。RPi2 は分かりません。)
+1. [Raspbian for Robots](http://www.dexterindustries.com/howto/install-raspbian-for-robots-image-on-an-sd-card/) (RPi3 と素の Raspbian だと Grove の反応が超絶イマイチです。粗悪品のボタンを掴んだか？って勘違いするほどです。ハマりました。RPi3 を使うなら OS は Raspbian for Robots がオススメです。RPi2 は分かりません。)
 2. Python module の pyicloud
 3. テキスト読み上げソフトとして [AquesTalkPi](http://www.a-quest.com/products/aquestalkpi.html)
 4. wrapper of AquesTalkPi (eg, atalk.sh)
