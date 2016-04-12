@@ -19,6 +19,7 @@ homeDir = os.path.expanduser("~")
 # Port init.
 button2 = 2
 button3 = 3
+countButton3 = 0
 
 grovepi.pinMode(button2, "INPUT")
 grovepi.pinMode(button3, "INPUT")
@@ -38,7 +39,13 @@ elif platform.system() == "Darwin":
         # quit()
 
 # AFN360 procedure
-def afn360():
+AFNchannels = ['http://13743.live.streamtheworld.com/AFNP_TKO',
+    'http://14093.live.streamtheworld.com/AFN_JOE',
+    'http://14703.live.streamtheworld.com/AFN_PTK',
+    'http://8723.live.streamtheworld.com/AFN_VCE'
+]
+
+def afn360(channel):
     foundMplayer = 0
     ps = subprocess.Popen('ps -A', stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=True)
     out = ps.communicate()[0]
@@ -55,7 +62,7 @@ def afn360():
 
     if foundMplayer == 0:
         print("start AFN.")
-        subprocess.Popen(["nohup", "mplayer", "http://13743.live.streamtheworld.com/AFNP_TKO"], stdout=open('/dev/null', 'w'), stderr=open('/tmp/speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
+        subprocess.Popen(["nohup", "mplayer", AFNchannels[channel]], stdout=open('/dev/null', 'w'), stderr=open('/tmp/speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
     else:
         os.remove('/tmp/speakEventsMplayer.log')
 
@@ -162,10 +169,11 @@ if __name__ == '__main__':
             if grovepi.digitalRead(button3) == 1:
                 print("push D3")
 
-                if not os.path.exists(lockFile):
-                    afn360()
+                if 0 <= countButton3 <= 3:
+                    afn360(countButton3)
+                    countButton3 = countButton3 + 1
                 else:
-                    print("locking...")
+                    countButton3 = -1
 
             time.sleep(.3)
 

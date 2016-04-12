@@ -2,11 +2,17 @@
 
 
 ## 説明
-Raspberry Pi 3 (以下 RPi3) に BLE やタクトスイッチなどから何かしらのアクションがあった時、iCloud から当日の予定を取得し音声でお知らせします。音声なので忙しい時でも、何かしながら予定の確認をすることができます。
+Raspberry Pi 3 (以下 RPi3) に BLE やタクトスイッチなどから何かしらのアクションがあった時、iCloud 内の当日の予定を取得し音声でお知らせします。音声なので忙しい場合でも、何かしながら予定の確認ができます。
 
-今回はアクションとして、お気楽極楽に GrovePi+ を使うことにしました。GrovePi+ の D2 port のボタンは iCloud Calendar を読み上げます。同 D3 は AFN Toyko を再生します。再生中だった場合、停止します。
+今回はアクションとして、お気楽極楽に GrovePi+ を使うことにしました。GrovePi+ の D2 と D3 port にボタンを接続します。D2 ボタンは iCloud Calendar を読み上げ、D3 ボタンは AFN Toyko を再生します。もし既に再生中だった場合、停止します。
 
 RPi3 を再起動してもこのプログラムが動くように sh を追加しました。なのでこれ単体で機能します。
+
+再生のたびに AFN のチャンネルを変更するようにしました。具体的には...
+
+再生(TKO)、停止、再生(JOE)、停止、再生(PTK)、停止、再生(VCE)、停止、再生(TKO)...
+
+となります。
 
 ![the thing](images/IMG_0047.png)
 
@@ -36,9 +42,9 @@ RPi3 を再起動してもこのプログラムが動くように sh を追加�
 9. sudo update-rc.d speakEventsService.sh defaults
 
 
-## 付録
 - example atalk.sh
 
+AquesTalkPi が作った wav データを再生する wrapper の例です。
 ```
 #!/bin/bash
 aquestalkpi=/home/pi/bin/aquestalkpi/AquesTalkPi
@@ -56,11 +62,17 @@ fi
 
 - /home/pi/.pyicloud format
 
+pyicloud を使うための設定ファイルの形式です。
 ```
 [account]
 user = yourappleid@example.com
 pass = your_appleid_password
 ```
+
+
+## 予定
+- ロータリーかスライダーで AFN のチャンネルを選択できるようにしたい。
+- 折角の RPi3 なので BLE でコントロールできるようにしたい。
 
 
 ## ライセンス

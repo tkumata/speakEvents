@@ -1,3 +1,5 @@
+#!/bin/sh
+
 ## BEGIN INIT INFO
 # Provides: speakEvents
 # Required-Start: $remote_fs $syslog
@@ -8,26 +10,38 @@
 # Description: Start speakEvents Server at boot time.
 ### END INIT INFO
 
-#!/bin/sh
+set -e
+
 #/etc/init.d/speakEventsService.sh
 
 export USER='pi'
-
 eval cd ~$USER
 
-# Check the state of the command: this'll either be start or stop
-case "$1" in
-  start)
+do_start() {
     # if it's start, then start vncserver using the details below
     echo "Starting spaekEvents for $USER..."
     su $USER -c 'nohup /home/pi/bin/speakEvents/speakEvents.py > /dev/null 2&>1 &'
     echo "...done (speakEvents)"
-    ;;
-  stop)
+}
+
+do_stop() {
     # if it's stop, then just kill the process
     echo "Stopping spaekEvents for $USER "
     su $USER -c 'kill -TERM `ps ax | pgrep -f speakEvents.py`'
     echo "...done (speakEvents)"
+}
+
+# Check the state of the command: this'll either be start or stop
+case "$1" in
+  start)
+    do_start
+    ;;
+  stop)
+    do_stop
+    ;;
+  restart)
+    do_stop
+    do_start
     ;;
   *)
     echo "Usage: /etc/init.d/speakEventsService.sh {start|stop}"
