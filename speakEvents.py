@@ -47,6 +47,7 @@ AFNchannels = ['http://13743.live.streamtheworld.com/AFNP_TKO',
 ]
 
 def afn360(channel):
+    global countButton3
     foundMplayer = 0
     ps = subprocess.Popen('ps -A', stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=True)
     out = ps.communicate()[0]
@@ -63,15 +64,13 @@ def afn360(channel):
 
     # play AFN
     if foundMplayer == 0:
-        global countButton3
         print("start AFN channel: %d.") % channel
         subprocess.Popen(["nohup", "mplayer", AFNchannels[channel]],
                             stdout=open('/dev/null', 'w'), stderr=open('/tmp/speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
-        if not 0 <= countButton3 <= len(AFNchannels)-2:
+        if not 0 <= countButton3 <= len(AFNchannels) - 2:
             countButton3 = 0
         else:
             countButton3 = channel + 1
-
     else:
         os.remove('/tmp/speakEventsMplayer.log')
 
