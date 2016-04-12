@@ -42,7 +42,8 @@ elif platform.system() == "Darwin":
 AFNchannels = ['http://13743.live.streamtheworld.com/AFNP_TKO',
     'http://14093.live.streamtheworld.com/AFN_JOE',
     'http://14703.live.streamtheworld.com/AFN_PTK',
-    'http://8723.live.streamtheworld.com/AFN_VCE'
+    'http://8723.live.streamtheworld.com/AFN_VCE',
+    'http://9323.live.streamtheworld.com/AFN_FRE'
 ]
 
 def afn360(channel):
@@ -66,8 +67,7 @@ def afn360(channel):
         print("start AFN channel: %d.") % channel
         subprocess.Popen(["nohup", "mplayer", AFNchannels[channel]],
                             stdout=open('/dev/null', 'w'), stderr=open('/tmp/speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
-
-        if not 0 <= countButton3 <= 2:
+        if not 0 <= countButton3 <= len(AFNchannels)-2:
             countButton3 = 0
         else:
             countButton3 = channel + 1
