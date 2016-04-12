@@ -54,7 +54,7 @@ def afn360(channel):
     
     # if this founds mplayer, kill mplayer and turn on flag.
     for line in out.splitlines():
-        if 'mplayer' in line and 'AFN_' in line:
+        if 'mplayer' in line and 'AFN' in line:
             foundMplayer = 1
             print("stop AFN.")
             pid = int(line.split(None, 1)[0])
