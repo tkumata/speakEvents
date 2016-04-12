@@ -51,22 +51,23 @@ def afn360(channel):
     foundMplayer = 0
     ps = subprocess.Popen('ps -A', stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=True)
     out = ps.communicate()[0]
-
+    
     # if this founds mplayer, kill mplayer and turn on flag.
     for line in out.splitlines():
-        if 'mplayer' in line:
+        if 'mplayer' in line and 'AFN_' in line:
             foundMplayer = 1
             print("stop AFN.")
             pid = int(line.split(None, 1)[0])
             os.kill(pid, signal.SIGKILL)
         else:
             pass
-
+            
     # play AFN
     if foundMplayer == 0:
         print("start AFN channel: %d.") % channel
         subprocess.Popen(["nohup", "mplayer", AFNchannels[channel]],
-                            stdout=open('/dev/null', 'w'), stderr=open('/tmp/speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
+            stdout=open('/dev/null', 'w'), stderr=open('/tmp/speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
+        # change to next channel
         if not 0 <= countButton3 <= len(AFNchannels) - 2:
             countButton3 = 0
         else:
@@ -87,29 +88,29 @@ def get_api():
     if os.path.isfile(filename):
         parser = SafeConfigParser()
         parser.read(filename)
-
+        
         userid = parser.get('account', 'user')
         assert isinstance(userid, str)
-
+        
         passwd = parser.get('account', 'pass')
         assert isinstance(passwd, str)
-
+        
         api = PyiCloudService(userid, passwd)
-
+        
         return api
     else:
         print u"config file not found."
 
 def get_iccdata():
     api = get_api()
-
+    
     if not api == "":
         d = datetime.datetime.today()
         from_dt = datetime.datetime(d.year, d.month, d.day)
         to_dt = datetime.datetime(d.year, d.month, d.day)
-
+        
         iccEvent = api.calendar.events(from_dt, to_dt)
-
+        
         return iccEvent
     else:
         print("api is null.")
@@ -118,9 +119,9 @@ def get_iccdata():
 def speakEvents():
     f = open(lockFile, "w")
     f.close()
-
+    
     events = get_iccdata()
-
+    
     if len(events) == 0:
         # 一日分のイベントが空
         talk = u"本日の予定はありません。以上"
@@ -138,7 +139,7 @@ def speakEvents():
                         eventTime = str(value[4]) + u"時" + str(value[5]) + u"分から"
                     #print eventTime,
                     subprocess.call(speaker + " 130 \"" + eventTime + "\"", shell=True)
-
+                    
                 if key == "endDate":
                     if value[4] == 0 and value[5] == 0:
                         eventEndTime = u"に、"
@@ -146,7 +147,7 @@ def speakEvents():
                         eventEndTime = str(value[4]) + u"時" + str(value[5]) + u"分まで、"
                     #print eventEndTime,
                     subprocess.call(speaker + " 130 \"" + eventEndTime + "\"", shell=True)
-
+                    
                 if key == "title":
                     eventTitle = value + u"の予定があります。"
                     #print eventTitle
@@ -168,7 +169,7 @@ if __name__ == '__main__':
         try:
             if grovepi.digitalRead(button2) == 1:
                 print("push D2")
-
+                
                 if not os.path.exists(lockFile):
                     speakEvents()
                 else:
@@ -177,8 +178,8 @@ if __name__ == '__main__':
             if grovepi.digitalRead(button3) == 1:
                 print("push D3")
                 afn360(countButton3)
-
+                
             time.sleep(.3)
-
+            
         except IOError:
             print("Error")
