@@ -2,15 +2,15 @@
 
 
 ## 説明
-Raspberry Pi 3 (以下 RPi3) に BLE やタクトスイッチなどから何かしらのアクションがあった時、iCloud 内の当日の予定を取得し音声でお知らせします。音声なので忙しい場合でも、何かしながら予定の確認ができます。
+Raspberry Pi 3 (以下 RPi3) に BLE やタクトスイッチなどから何かしらのアクションがあった時、iCloud 内の当日の全予定を取得し音声でお知らせします。音声なので忙しい場合でも、何かしながら予定の確認ができます。また、付録機能として AFN の再生ができます。
 
-今回はアクションとして、お気楽極楽に GrovePi+ を使うことにしました。GrovePi+ の D2 と D3 port にボタンを接続します。D2 ボタンは iCloud Calendar を読み上げ、D3 ボタンは AFN Toyko を再生します。もし既に再生中だった場合、停止します。
+今回はアクションとして、お気楽極楽に GrovePi+ を使うことにしました。GrovePi+ の D2 と D3 port にボタンを接続します。D2 ボタンは iCloud Calendar を読み上げ、D3 ボタンは AFN を再生します。もし既に再生中だった場合、停止します。
 
 RPi3 を再起動してもこのプログラムが動くように sh を追加しました。なのでこれ単体で機能します。
 
 再生のたびに AFN のチャンネルを変更するようにしました。具体的には...
 
-再生(Tokyo)、停止、再生(Joe)、停止、再生(PowerTalk)、停止、再生(Voice)、停止、再生(Freedom)、停止、再生(Tokyo)...
+再生(Tokyo)、停止、再生(Joe)、停止、再生(Power Talk)、停止、再生(The Voice)、停止、再生(Freedom)、停止、再生(Tokyo)...
 
 となります。
 
@@ -24,7 +24,7 @@ RPi3 を再起動してもこのプログラムが動くように sh を追加�
 
 
 ## 必要なソフト
-1. OS として [Raspbian for Robots](http://www.dexterindustries.com/howto/install-raspbian-for-robots-image-on-an-sd-card/) (RPi3 と素の Raspbian の組み合わせだと Grove の反応が超絶イマイチで、粗悪品のボタンを掴んだか？って勘違いするほどです。ハマりました。RPi3 を使うなら OS は Raspbian for Robots がオススメです。RPi2 は分かりません。)
+1. OS として [Raspbian for Robots](http://www.dexterindustries.com/howto/install-raspbian-for-robots-image-on-an-sd-card/) (RPi3 と素の Raspbian の組み合わせだと Grove の反応が超絶イマイチで、粗悪品のボタンを掴んだか？って勘違いするほどです。ハマりました。2016/04/12 時点で RPi3 を使うなら OS は Raspbian for Robots がオススメです。RPi2 は分かりません。)
 2. Python module の pyicloud
 3. テキスト読み上げソフトとして [AquesTalkPi](http://www.a-quest.com/products/aquestalkpi.html) (AquesTalkPi なら日本語もある程度の英語も設定なしで喋ってくれるので)
 4. wrapper of AquesTalkPi (eg, atalk.sh) (AquesTalkPi は wav を作るだけなので aplay で再生するようにラッパーを作成)
