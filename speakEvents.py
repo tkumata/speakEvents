@@ -49,7 +49,7 @@ AFNchannels = ['http://13743.live.streamtheworld.com/AFNP_TKO',
 def afn360(channel):
     global countButton3
     foundMplayer = 0
-    ps = subprocess.Popen('ps -A', stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=True)
+    ps = subprocess.Popen('ps ax', stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=True)
     out = ps.communicate()[0]
     
     # if this founds mplayer, kill mplayer and turn on flag.
