@@ -60,9 +60,13 @@ def afn360(channel):
         else:
             pass
 
+    # play AFN
     if foundMplayer == 0:
-        print("start AFN.")
-        subprocess.Popen(["nohup", "mplayer", AFNchannels[channel]], stdout=open('/dev/null', 'w'), stderr=open('/tmp/speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
+        global countButton3
+        print("start AFN %d.") % channel
+        subprocess.Popen(["nohup", "mplayer", AFNchannels[channel]],
+                            stdout=open('/dev/null', 'w'), stderr=open('/tmp/speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
+        countButton3 = channel + 1
     else:
         os.remove('/tmp/speakEventsMplayer.log')
 
@@ -171,9 +175,8 @@ if __name__ == '__main__':
 
                 if 0 <= countButton3 <= 3:
                     afn360(countButton3)
-                    countButton3 = countButton3 + 1
                 else:
-                    countButton3 = -1
+                    countButton3 = 0
 
             time.sleep(.3)
 
