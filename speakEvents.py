@@ -63,10 +63,15 @@ def afn360(channel):
     # play AFN
     if foundMplayer == 0:
         global countButton3
-        print("start AFN %d.") % channel
+        print("start AFN channel: %d.") % channel
         subprocess.Popen(["nohup", "mplayer", AFNchannels[channel]],
                             stdout=open('/dev/null', 'w'), stderr=open('/tmp/speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
-        countButton3 = channel + 1
+
+        if not 0 <= countButton3 <= 2:
+            countButton3 = 0
+        else:
+            countButton3 = channel + 1
+
     else:
         os.remove('/tmp/speakEventsMplayer.log')
 
@@ -172,11 +177,7 @@ if __name__ == '__main__':
 
             if grovepi.digitalRead(button3) == 1:
                 print("push D3")
-
-                if 0 <= countButton3 <= 3:
-                    afn360(countButton3)
-                else:
-                    countButton3 = 0
+                afn360(countButton3)
 
             time.sleep(.3)
 
