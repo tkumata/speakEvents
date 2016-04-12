@@ -20,13 +20,13 @@ eval cd ~$USER
 do_start() {
     # if it's start, then start vncserver using the details below
     echo "Starting spaekEvents for $USER..."
-    su $USER -c 'nohup /home/pi/bin/speakEvents/speakEvents.py > /dev/null 2&>1 &'
+    su $USER -c 'nohup /home/pi/bin/speakEvents/speakEvents.py > /dev/null 2>&1 &'
     echo "...done (speakEvents)"
 }
 
 do_stop() {
     # if it's stop, then just kill the process
-    echo "Stopping spaekEvents for $USER "
+    echo "Stopping spaekEvents for $USER..."
     su $USER -c 'kill -TERM `ps ax | pgrep -f speakEvents.py`'
     echo "...done (speakEvents)"
 }
@@ -40,11 +40,10 @@ case "$1" in
     do_stop
     ;;
   restart)
-    do_stop
-    do_start
+    do_stop && do_start
     ;;
   *)
-    echo "Usage: /etc/init.d/speakEventsService.sh {start|stop}"
+    echo "Usage: /etc/init.d/speakEventsService.sh {start|stop|restart}"
     exit 1
     ;;
 esac
