@@ -64,7 +64,7 @@ def afn360(channel):
             
     # play AFN
     if foundMplayer == 0:
-        print("start AFN channel: %d.") % channel
+        print("start AFN channel: %s.") % AFNchannels[channel]
         subprocess.Popen(["nohup", "mplayer", AFNchannels[channel]],
             stdout=open('/dev/null', 'w'), stderr=open('/tmp/speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
         # change to next channel
