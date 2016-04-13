@@ -15,12 +15,12 @@ import daemon
 import grovepi
 
 homeDir = os.path.expanduser("~")
-
-# Port init.
-button2 = 2
-button3 = 3
+lockFile = "/tmp/speakEventsLockfile"
 countButton3 = 0
 
+# init Port.
+button2 = 2
+button3 = 3
 grovepi.pinMode(button2, "INPUT")
 grovepi.pinMode(button3, "INPUT")
 
@@ -30,15 +30,15 @@ if platform.system() == "Linux":
         speaker = "/home/pi/bin/atalk.sh -s"
     else:
         print("atalk.sh がありません。")
-        # quit()
+        quit()
 elif platform.system() == "Darwin":
     if spawn.find_executable('/usr/bin/say'):
         speaker = "/usr/bin/say -r"
     else:
         print("say がありません。")
-        # quit()
+        quit()
 
-# AFN360 procedure
+# AFN channels
 AFNchannels = ['http://13743.live.streamtheworld.com/AFNP_TKO',
     'http://14093.live.streamtheworld.com/AFN_JOE',
     'http://14703.live.streamtheworld.com/AFN_PTK',
@@ -46,6 +46,7 @@ AFNchannels = ['http://13743.live.streamtheworld.com/AFNP_TKO',
     'http://9323.live.streamtheworld.com/AFN_FRE'
 ]
 
+# AFN360 procedure, play and stop
 def afn360(channel):
     global countButton3
     foundMplayer = 0
@@ -75,16 +76,16 @@ def afn360(channel):
     else:
         os.remove('/tmp/speakEventsMplayer.log')
 
-# check config file
+# check config file and get iCloud API.
 #
 # touch ~/.pyicloud && chmod 600 ~/.pyicloud && vi ~/.pyicloud
 #[account]
 #user = your appleid
 #pass = your appleid password
 #
-lockFile = "/tmp/speakEventsLockfile"
-filename = '/home/pi/.pyicloud'
 def get_api():
+    filename = '/home/pi/.pyicloud'
+
     if os.path.isfile(filename):
         parser = SafeConfigParser()
         parser.read(filename)
@@ -100,7 +101,9 @@ def get_api():
         return api
     else:
         print u"config file not found."
+        quit()
 
+# get iCloud Calendar data.
 def get_iccdata():
     api = get_api()
     
@@ -114,12 +117,15 @@ def get_iccdata():
         return iccEvent
     else:
         print("api is null.")
-        # quit()
+        quit()
 
+# speak events.
 def speakEvents():
+    # create lock file
     f = open(lockFile, "w")
     f.close()
     
+    # get iCloud Calendar
     events = get_iccdata()
     
     if len(events) == 0:
@@ -182,4 +188,5 @@ if __name__ == '__main__':
             time.sleep(.3)
             
         except IOError:
-            print("Error")
+            print("IO Error.")
+            quit()
