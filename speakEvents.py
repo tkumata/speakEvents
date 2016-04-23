@@ -40,16 +40,20 @@ elif platform.system() == "Darwin":
         quit()
 
 # AFN channels
-AFNchannels = ['http://13743.live.streamtheworld.com/AFNP_TKO',
+AFNchannels = ['http://14023.live.streamtheworld.com/AFNP_TKO',
     'http://14093.live.streamtheworld.com/AFN_JOE',
-    'http://14703.live.streamtheworld.com/AFN_PTK',
-    'http://8723.live.streamtheworld.com/AFN_VCE',
-    'http://9323.live.streamtheworld.com/AFN_FRE'
+    'http://4533.live.streamtheworld.com/AFNP_PTK',
+    'http://6073.live.streamtheworld.com/AFN_VCE',
+    'http://14963.live.streamtheworld.com/AFN_FRE'
 ]
 
 # AFN360 procedure, play and stop
 def afn360(channel):
     global countButton3
+    
+    # create lock file
+    f = open(lockFile, "w")
+    f.close()
     
     foundMplayer = 0
     
@@ -81,6 +85,9 @@ def afn360(channel):
         
     else:
         os.remove(mplayerLog)
+    
+    #
+    os.remove(lockFile)
 
 # check config file and get iCloud API.
 #
@@ -187,7 +194,11 @@ if __name__ == '__main__':
 
             if grovepi.digitalRead(button3) == 1:
                 print("=====> push D3")
-                afn360(countButton3)
+                
+                if not os.path.exists(lockFile):
+                    afn360(countButton3)
+                else:
+                    print("=====> locking...")
                 
             time.sleep(.1)
             
