@@ -11,7 +11,6 @@ import subprocess, signal
 import time
 import os, sys
 import platform
-import daemon
 import grovepi
 
 homeDir = os.path.expanduser("~")
@@ -66,8 +65,7 @@ def afn360(channel):
     # play AFN
     if foundMplayer == 0:
         print("start AFN channel: %s.") % AFNchannels[channel]
-        subprocess.Popen(["nohup", "mplayer", AFNchannels[channel]],
-            stdout=open('/dev/null', 'w'), stderr=open('/tmp/speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
+        subprocess.Popen(["nohup", "mplayer", AFNchannels[channel]], stdout=open('/dev/null', 'w'), stderr=open('/tmp/speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
         # change to next channel
         if not 0 <= countButton3 <= len(AFNchannels) - 2:
             countButton3 = 0
