@@ -14,7 +14,9 @@ import platform
 import grovepi
 
 homeDir = os.path.expanduser("~")
+configFile = '/home/pi/.pyicloud'
 lockFile = "/tmp/speakEventsLockfile"
+mplayerLog = "/tmp/speakEventsMpLogfile"
 countButton3 = 0
 
 # init Port.
@@ -28,13 +30,13 @@ if platform.system() == "Linux":
     if spawn.find_executable('/home/pi/bin/atalk.sh'):
         speaker = "/home/pi/bin/atalk.sh -s"
     else:
-        print("atalk.sh がありません。")
+        print("=====> atalk.sh がありません。")
         quit()
 elif platform.system() == "Darwin":
     if spawn.find_executable('/usr/bin/say'):
         speaker = "/usr/bin/say -r"
     else:
-        print("say がありません。")
+        print("=====> say がありません。")
         quit()
 
 # AFN channels
@@ -48,31 +50,37 @@ AFNchannels = ['http://13743.live.streamtheworld.com/AFNP_TKO',
 # AFN360 procedure, play and stop
 def afn360(channel):
     global countButton3
+    
     foundMplayer = 0
-    ps = subprocess.Popen('ps ax', stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=True)
-    out = ps.communicate()[0]
     
     # if this founds mplayer, kill mplayer and turn on flag.
+    psCmd = subprocess.Popen('ps ax', stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=True)
+    out = psCmd.communicate()[0]
+    
     for line in out.splitlines():
         if 'mplayer' in line and 'AFN' in line:
             foundMplayer = 1
-            print("stop AFN.")
+            print("=====> stop AFN.")
             pid = int(line.split(None, 1)[0])
             os.kill(pid, signal.SIGKILL)
-        else:
-            pass
-            
+        
     # play AFN
     if foundMplayer == 0:
-        print("start AFN channel: %s.") % AFNchannels[channel]
-        subprocess.Popen(["nohup", "mplayer", AFNchannels[channel]], stdout=open('/dev/null', 'w'), stderr=open('/tmp/speakEventsMplayer.log', 'a'), preexec_fn=os.setpgrp)
+        print("=====> start AFN channel: %s.") % AFNchannels[channel]
+        
+        subprocess.Popen(["nohup", "mplayer", AFNchannels[channel]],
+                         stdout=open('/dev/null', 'w'),
+                         stderr=open(mplayerLog, 'a'),
+                         preexec_fn=os.setpgrp)
+        
         # change to next channel
         if not 0 <= countButton3 <= len(AFNchannels) - 2:
             countButton3 = 0
         else:
             countButton3 = channel + 1
+        
     else:
-        os.remove('/tmp/speakEventsMplayer.log')
+        os.remove(mplayerLog)
 
 # check config file and get iCloud API.
 #
@@ -82,11 +90,9 @@ def afn360(channel):
 #pass = your appleid password
 #
 def get_api():
-    filename = '/home/pi/.pyicloud'
-
-    if os.path.isfile(filename):
+    if os.path.isfile(configFile):
         parser = SafeConfigParser()
-        parser.read(filename)
+        parser.read(configFile)
         
         userid = parser.get('account', 'user')
         assert isinstance(userid, str)
@@ -98,9 +104,9 @@ def get_api():
         
         return api
     else:
-        print u"config file not found."
+        print u"=====> config file not found."
         quit()
-
+    
 # get iCloud Calendar data.
 def get_iccdata():
     api = get_api()
@@ -114,9 +120,9 @@ def get_iccdata():
         
         return iccEvent
     else:
-        print("api is null.")
+        print("=====> api is null.")
         quit()
-
+    
 # speak events.
 def speakEvents():
     # create lock file
@@ -172,19 +178,19 @@ if __name__ == '__main__':
     while True:
         try:
             if grovepi.digitalRead(button2) == 1:
-                print("push D2")
+                print("=====> push D2")
                 
                 if not os.path.exists(lockFile):
                     speakEvents()
                 else:
-                    print("locking...")
+                    print("=====> locking...")
 
             if grovepi.digitalRead(button3) == 1:
-                print("push D3")
+                print("=====> push D3")
                 afn360(countButton3)
                 
-            time.sleep(.3)
+            time.sleep(.1)
             
         except IOError:
-            print("IO Error.")
+            print("=====> IO Error.")
             quit()

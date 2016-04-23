@@ -1,6 +1,6 @@
 #!/bin/sh
 
-## BEGIN INIT INFO
+### BEGIN INIT INFO
 # Provides: speakEvents
 # Required-Start: $remote_fs $syslog
 # Required-Stop: $remote_fs $syslog

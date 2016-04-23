@@ -24,7 +24,7 @@ RPi3 を再起動してもこのプログラムが動くように sh を追加�
 
 
 ## 必要なソフト
-1. OS として [Raspbian for Robots](http://www.dexterindustries.com/howto/install-raspbian-for-robots-image-on-an-sd-card/) (RPi3 と素の Raspbian の組み合わせだと Grove の反応が超絶イマイチで、粗悪品のボタンを掴んだか？って勘違いするほどです。ハマりました。2016/04/12 時点で RPi3 を使うなら OS は Raspbian for Robots がオススメです。RPi2 は分かりません。)
+1. OS として [Raspbian for Robots](http://www.dexterindustries.com/howto/install-raspbian-for-robots-image-on-an-sd-card/) (RPi3 と素の Raspbian の組み合わせだと Grove の反応が超絶イマイチで、粗悪品のボタンを掴んだか？って勘違いするほどです。ハマりました。2016/04/12 時点で GrovePi と RPi3 の組み合わせを使うなら OS は Raspbian for Robots がオススメです。RPi2 は分かりません。)
 2. Python module の pyicloud
 3. テキスト読み上げソフトとして [AquesTalkPi](http://www.a-quest.com/products/aquestalkpi.html) (AquesTalkPi なら日本語もある程度の英語も設定なしで喋ってくれるので)
 4. wrapper of AquesTalkPi (eg, atalk.sh) (AquesTalkPi は wav を作るだけなので aplay で再生するようにラッパーを作成)
@@ -45,6 +45,7 @@ RPi3 を再起動してもこのプログラムが動くように sh を追加�
 - example atalk.sh
 
 AquesTalkPi が作った wav データを再生する wrapper の例です。
+
 ```
 #!/bin/bash
 aquestalkpi=/home/pi/bin/aquestalkpi/AquesTalkPi
@@ -63,6 +64,7 @@ fi
 - /home/pi/.pyicloud format
 
 pyicloud を使うための設定ファイルの形式です。
+
 ```
 [account]
 user = yourappleid@example.com
