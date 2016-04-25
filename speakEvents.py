@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
+import grovepi
 from pyicloud import PyiCloudService    # pip install pyicloud
 from ConfigParser import SafeConfigParser
 from pprint import pprint
@@ -11,7 +12,6 @@ import subprocess, signal
 import time
 import os, sys
 import platform
-import grovepi
 
 homeDir = os.path.expanduser("~")
 configFile = '/home/pi/.pyicloud'
@@ -22,8 +22,10 @@ countButton3 = 0
 # init Port.
 button2 = 2
 button3 = 3
+#button4 = 4
 grovepi.pinMode(button2, "INPUT")
 grovepi.pinMode(button3, "INPUT")
+#grovepi.pinMode(button4, "OUTPUT")
 
 # check text speaker
 if platform.system() == "Linux":
@@ -51,13 +53,13 @@ AFNchannels = ['http://14023.live.streamtheworld.com/AFNP_TKO',
 def afn360(channel):
     global countButton3
     
-    # create lock file
+    # create lock file.
     f = open(lockFile, "w")
     f.close()
     
     foundMplayer = 0
     
-    # if this founds mplayer, kill mplayer and turn on flag.
+    # if this code founds mplayer, kill mplayer and turn on flag.
     psCmd = subprocess.Popen('ps ax', stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=True)
     out = psCmd.communicate()[0]
     
@@ -68,25 +70,25 @@ def afn360(channel):
             pid = int(line.split(None, 1)[0])
             os.kill(pid, signal.SIGKILL)
         
-    # play AFN
+    # Play AFN
     if foundMplayer == 0:
+        # If not found mplayer, run mplayer.
         print("=====> start AFN channel: %s.") % AFNchannels[channel]
         
         subprocess.Popen(["nohup", "mplayer", AFNchannels[channel]],
                          stdout=open('/dev/null', 'w'),
                          stderr=open(mplayerLog, 'a'),
                          preexec_fn=os.setpgrp)
-        
         # change to next channel
         if not 0 <= countButton3 <= len(AFNchannels) - 2:
             countButton3 = 0
         else:
             countButton3 = channel + 1
-        
     else:
+        # If found mplayer, remove mplayer log file.
         os.remove(mplayerLog)
-    
-    #
+
+    # Remove lock file.
     os.remove(lockFile)
 
 # check config file and get iCloud API.
@@ -191,7 +193,7 @@ if __name__ == '__main__':
                     speakEvents()
                 else:
                     print("=====> locking...")
-
+                
             if grovepi.digitalRead(button3) == 1:
                 print("=====> push D3")
                 
