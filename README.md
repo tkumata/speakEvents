@@ -16,6 +16,8 @@ RPi3 を再起動してもこのプログラムが動くように sh を追加�
 
 ![the thing](images/IMG_0047.png)
 
+予定を喋る前に指定した URL の天気情報を喋るようにしました。
+
 
 ## 必要なハード
 1. Raspberry Pi (Well, I use RPi3 model B.)
@@ -69,6 +71,9 @@ pyicloud を使うための設定ファイルの形式です。
 [account]
 user = yourappleid@example.com
 pass = your_appleid_password
+[weatherurls]
+weather1 = http://www.tenki.jp/forecast/3/16/
+weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 ```
 
 

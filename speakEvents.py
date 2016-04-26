@@ -12,12 +12,16 @@ import subprocess, signal
 import time
 import os, sys
 import platform
+import requests, re
 
 homeDir = os.path.expanduser("~")
 configFile = '/home/pi/.pyicloud'
 lockFile = "/tmp/speakEventsLockfile"
 mplayerLog = "/tmp/speakEventsMpLogfile"
 countButton3 = 0
+
+weatherurl1 = ''
+weatherurl2 = ''
 
 # init Port.
 button2 = 2
@@ -99,9 +103,16 @@ def afn360(channel):
 #pass = your appleid password
 #
 def get_api():
+    global weatherurl1, weatherurl2
+    
     if os.path.isfile(configFile):
         parser = SafeConfigParser()
         parser.read(configFile)
+        
+        weatherurl1 = parser.get('weatherurls', 'weather1')
+        assert isinstance(weatherurl1, str)
+        weatherurl2 = parser.get('weatherurls', 'weather2')
+        assert isinstance(weatherurl2, str)
         
         userid = parser.get('account', 'user')
         assert isinstance(userid, str)
@@ -132,15 +143,41 @@ def get_iccdata():
         print("=====> api is null.")
         quit()
     
+# Get Weather Info 1
+def get_weatherinfo1(url):
+    req = requests.get(url)
+    html = req.text
+
+    strPattern = r'<h2 class="sub_title">(.*)</p>'
+    tagPattern = re.compile(r"<[^>]*?>")
+
+    matches = re.finditer(strPattern, html)
+    
+    for match in matches:
+        w = tagPattern.sub("", match.groups()[0])
+
+    return w
+
 # speak events.
 def speakEvents():
     # create lock file
     f = open(lockFile, "w")
     f.close()
     
-    # get iCloud Calendar
+    # Get iCloud Calendar
     events = get_iccdata()
     
+    # Get weather
+    weatherinfo1 = get_weatherinfo1(weatherurl1)
+#    weatherinfo2 = get_weatherinfo2(weatherurl2)
+    
+    # Speak Weather
+    if not len(weatherinfo1) == 0:
+#        print(u"=====> " + weatherinfo1)
+        subprocess.call(speaker + " 130 \"" + weatherinfo1 + "\"", shell=True)
+        time.sleep(1)
+    
+    # Speak Events
     if len(events) == 0:
         # 一日分のイベントが空
         talk = u"本日の予定はありません。以上"
@@ -178,6 +215,8 @@ def speakEvents():
         endTalk = u"忘れ物はありませんか。以上"
         subprocess.call(speaker + " 120 \"" + endTalk + "\"", shell=True)
     # End if
+    
+    # Remove lock file.
     os.remove(lockFile)
 
 #
