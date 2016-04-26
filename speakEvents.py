@@ -189,12 +189,14 @@ def get_weatherinfo2(url):
             rainN = u'なし'
         info.append(rainN)
 
-    # info : [気温, NN, NN, 降水確率, 0時から6時, NN%, 6時から12時, NN%, 12時から18時, NN%, 18時から24時, NN%]
+    # info : [気温, 最高気温, NN, 最低気温, NN, 降水確率, 0時から6時, NN%, 6時から12時, NN%, 12時から18時, NN%, 18時から24時, NN%]
     if len(info) == 8:
-        info.insert(4, u'0時から6時')
-        info.insert(6, u'6時から12時')
-        info.insert(8, u'12時から18時')
-        info.insert(10, u'18時から24時')
+        info.insert(1, u'最高気温')
+        info.insert(3, u'最低気温')
+        info.insert(6, u'0時から6時')
+        info.insert(8, u'6時から12時')
+        info.insert(10, u'12時から18時')
+        info.insert(12, u'18時から24時')
     else:
         info = []
 
