@@ -103,6 +103,9 @@ def afn360(channel):
 #[account]
 #user = your appleid
 #pass = your appleid password
+#[weatherurls]
+#weather1 = http://www.tenki.jp/forecast/3/16/
+#weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 #
 def get_config():
     global weatherurl1, weatherurl2, userid, passwd
@@ -206,13 +209,10 @@ def speakEvents():
     # Get config
     get_config()
 
-    # Get iCloud Calendar
-    events = get_iccdata()
-    
     # Speak Weather 1
     weatherinfo1 = get_weatherinfo1(weatherurl1)
     if not len(weatherinfo1) == 0:
-        subprocess.call(speaker + ' 130 "' + weatherinfo1 + '"', shell=True)
+        subprocess.call(speaker + ' 140 "' + weatherinfo1 + '"', shell=True)
         time.sleep(1)
     
     # Speak Weather 2
@@ -223,6 +223,7 @@ def speakEvents():
         time.sleep(1)
     
     # Speak Events
+    events = get_iccdata()
     if len(events) == 0:
         # 一日分のイベントが空
         talk = u'本日の予定はありません。以上'
