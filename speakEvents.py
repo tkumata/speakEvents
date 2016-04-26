@@ -158,6 +158,35 @@ def get_weatherinfo1(url):
 
     return w
 
+# Get Weather Info 2
+def get_weatherinfo2(url):
+    # info : 気温、最高、最低、降水確率、%, %, %, %
+    info = []
+    req = requests.get(url)
+    html = req.text
+    tagPattern = re.compile(r"<[^>]*?>")
+    
+    # Get Temp
+    tempPattern = ur'<td class="temp"><span class="bold">(.*)</span>℃</td>'
+    matches = re.finditer(tempPattern, html)
+    info.append(u'気温')
+    i = 0
+    for match in matches:
+        if i < 2:
+            w = tagPattern.sub("", match.groups()[0])
+            info.append(w + u'度')
+            i = i + 1
+    
+    # Get
+    rainPattern = ur'<th abbr="降水確率">降水確率</th>.*<td>(.*%)</td>.*?<!-- 明日の天気 -->'
+    matches = re.finditer(rainPattern, html, re.DOTALL)
+    info.append(u'降水確率')
+    for match in matches:
+        w = tagPattern.sub("", match.groups()[0])
+        info.append(w)
+
+    return info
+
 # speak events.
 def speakEvents():
     # create lock file
@@ -169,12 +198,17 @@ def speakEvents():
     
     # Get weather
     weatherinfo1 = get_weatherinfo1(weatherurl1)
-#    weatherinfo2 = get_weatherinfo2(weatherurl2)
+    weatherinfo2 = get_weatherinfo2(weatherurl2)
     
-    # Speak Weather
+    # Speak Weather 1
     if not len(weatherinfo1) == 0:
-#        print(u"=====> " + weatherinfo1)
         subprocess.call(speaker + " 130 \"" + weatherinfo1 + "\"", shell=True)
+        time.sleep(1)
+    
+    # Speak Weather 2
+    if not len(weatherinfo2) == 0:
+        for info in weatherinfo2:
+            subprocess.call(speaker + " 130 \"" + info + "\"", shell=True)
         time.sleep(1)
     
     # Speak Events
