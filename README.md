@@ -2,7 +2,7 @@
 
 
 ## 説明
-Raspberry Pi 3 (以下 RPi3) に BLE やタクトスイッチなどから何かしらのアクションがあった時、iCloud 内の当日の全予定を取得し音声でお知らせします。音声なので忙しい場合でも、何かしながら予定の確認ができます。また、付録機能として AFN の再生ができます。
+Raspberry Pi 3 (以下 RPi3) に BLE やスイッチなどから何かしらのアクションがあった時、tenki.jp の天気情報や iCloud 内の当日の全予定を音声でお知らせします。音声なので忙しい場合でも、何かしながら予定の確認ができます。また、付録機能として AFN の再生ができます。
 
 今回はアクションとして、お気楽極楽に GrovePi+ を使うことにしました。GrovePi+ の D2 と D3 port にボタンを接続します。D2 ボタンは iCloud Calendar を読み上げ、D3 ボタンは AFN を再生します。もし既に再生中だった場合、停止します。
 
@@ -15,8 +15,6 @@ RPi3 を再起動してもこのプログラムが動くように sh を追加�
 となります。
 
 ![the thing](images/IMG_0047.png)
-
-予定を喋る前に指定した URL の天気情報を喋るようにしました。
 
 
 ## 必要なハード
@@ -38,7 +36,7 @@ RPi3 を再起動してもこのプログラムが動くように sh を追加�
 3. Download [AquesTalkPi](http://www.a-quest.com/products/aquestalkpi.html) and unzip.
 4. Create wrapper (eg, vi atalk.sh).
 5. git clone git@github.com:tkumata/speakEvents.git
-6. touch /home/pi/.pyicloud && chmod 600 /home/pi/.pyicloud && vi /home/pi/.pyicloud (Please see below.)
+6. touch /home/pi/.speakevents && chmod 600 /home/pi/.speakevents && vi /home/pi/.speakevents (Please see below.)
 7. Adjust "speakEvents.py" (eg, path etc...)
 8. sudo cp speakEventsService.sh /etc/init.d/
 9. sudo update-rc.d speakEventsService.sh defaults
@@ -63,14 +61,15 @@ fi
 ```
 
 
-- /home/pi/.pyicloud format
+- /home/pi/.speakevents format
 
-pyicloud を使うための設定ファイルの形式です。
+pyicloud を使うための設定ファイルの形式です。天気情報は tenki.jp のみ対応しています。
 
 ```
 [account]
 user = yourappleid@example.com
 pass = your_appleid_password
+
 [weatherurls]
 weather1 = http://www.tenki.jp/forecast/3/16/
 weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
@@ -80,6 +79,7 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 ## 予定
 - ロータリーかスライダーで AFN のチャンネルを選択できるようにしたい。
 - 折角の RPi3 なので BLE でコントロールできるようにしたい。
+- ニュースヘッドラインも追加したい。
 
 
 ## ライセンス
