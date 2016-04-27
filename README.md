@@ -14,8 +14,7 @@ RPi3 を再起動してもこのプログラムが動くように sh を追加�
 
 となります。
 
-![the thing](images/IMG_0047.png)
-
+[![the thing](images/IMG0047.png)](images/IMG0054.m4v)
 
 ## 必要なハード
 1. Raspberry Pi (Well, I use RPi3 model B.)
