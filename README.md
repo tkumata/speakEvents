@@ -4,7 +4,7 @@
 ## 説明
 Raspberry Pi 3 (以下 RPi3) に BLE やボタンなどから何かしらの入力があった時、tenki.jp の天気情報や iCloud 内の当日の全予定を音声でお知らせします。音声なので忙しい場合でも、何かしながら予定の確認ができます。また、付録機能として AFN 360 の再生ができます。
 
-今回は入力として、お気楽極楽に GrovePi+ を使うことにしました。GrovePi+ の D2, D3 port にボタンを接続します。D2 port のボタンは天気情報と iCloud Calendar を読み上げ、D3 port のボタンは AFN 360 を再生します。もし既に再生中だった場合、停止します。
+今回はお気楽極楽に、入力として GrovePi+ を使うことにしました。GrovePi+ の D2, D3 port にボタンを接続します。D2 port のボタンは天気情報と iCloud Calendar を読み上げ、D3 port のボタンは AFN 360 を再生します。もし既に再生中だった場合、停止します。
 
 RPi3 を再起動してもこのプログラムが動くように sh を追加しました。なのでこれ単体で機能します。
 
@@ -14,7 +14,10 @@ RPi3 を再起動してもこのプログラムが動くように sh を追加�
 
 となります。
 
+[動画](images/IMG0054.m4v)
+
 [![the thing](images/IMG0047.png)](images/IMG0054.m4v)
+
 
 ## 必要なハード
 1. Raspberry Pi (Well, I use RPi3 model B.)

@@ -3,7 +3,7 @@
 import grovepi
 from pyicloud import PyiCloudService        # pip install pyicloud
 from ConfigParser import SafeConfigParser
-from pprint import pprint
+#from pprint import pprint
 from distutils import spawn
 import datetime
 import locale
@@ -21,7 +21,7 @@ configFile = homeDir + '/.speakevents'
 lockFile = '/tmp/speakEventsLockfile'
 mplayerLog = '/tmp/speakEventsMpLogfile'
 countButton3 = 0
-weatherurl1 = ''
+weatherurl1 = 'http://www.tenki.jp/forecast/3/16/'
 weatherurl2 = ''
 userid = ''
 passwd = ''
@@ -121,11 +121,15 @@ def get_config():
         passwd = parser.get('account', 'pass')
         assert isinstance(passwd, str)
         
-        weatherurl1 = parser.get('weatherurls', 'weather1')
-        assert isinstance(weatherurl1, str)
+        w1 = parser.get('weatherurls', 'weather1')
+        if not w1 == '':
+            weatherurl1 = w1
+            assert isinstance(weatherurl1, str)
         
-        weatherurl2 = parser.get('weatherurls', 'weather2')
-        assert isinstance(weatherurl2, str)
+        w2 = parser.get('weatherurls', 'weather2')
+        if not w2 == '':
+            weatherurl2 = w2
+            assert isinstance(weatherurl2, str)
     else:
         print u'=====> config file not found.'
         quit()
@@ -147,61 +151,63 @@ def get_iccdata():
 
 # Get Weather Info 1
 def get_weatherinfo1(url):
+    htmlTagPattern = re.compile(r'<[^>]*?>')            # remove html tag pattern
+
+    # Get HTML strings
     req = requests.get(url)
     html = req.text
-    
     strPattern = r'<h2 class="sub_title">(.*)</p>'
-    tagPattern = re.compile(r'<[^>]*?>')            # remove html tag pattern
     matches = re.finditer(strPattern, html)
     
     for match in matches:
-        w = tagPattern.sub('', match.groups()[0])
+        w = htmlTagPattern.sub('', match.groups()[0])
     
     return w
 
 # Get Weather Info 2
 def get_weatherinfo2(url):
     info = []
-    tagPattern = re.compile(r'<[^>]*?>')                # remove html tag pattern
+    htmlTagPattern = re.compile(r'<[^>]*?>')                # remove html tag pattern
     
     # Get HTML strings of today's weather
     req = requests.get(url)
     html = req.text
     tmpPattern = ur'今日の天気(.*?)明日の天気'
     match = re.search(tmpPattern, html, re.DOTALL)
-    todayHtml = match.group(1)
+    todaysHtml = match.group(1)
     
     # Get high and low temperature.
     tempPattern = ur'<td class="temp"><span class="bold">(.*)</span>℃</td>'
-    matches = re.finditer(tempPattern, todayHtml)
+    matches = re.finditer(tempPattern, todaysHtml)
     info.append(u'気温')
     for match in matches:
-        tempN = tagPattern.sub('', match.groups()[0])
+        tempN = htmlTagPattern.sub('', match.groups()[0])
         info.append(tempN + u'度')
-    # info : [気温, NN度, NN度]
+    # In this step info[] has began following,
+    # [気温, N度, N度]
     
     # Get chance of rain.
     rainPattern = ur'<td>(.*)</td>'
-    matches = re.finditer(rainPattern, todayHtml)
+    matches = re.finditer(rainPattern, todaysHtml)
     info.append(u'降水確率')
     for match in matches:
-        rainN = tagPattern.sub('', match.groups()[0])
+        rainN = htmlTagPattern.sub('', match.groups()[0])
         if rainN == '---':
             rainN = u'なし'
         info.append(rainN)
-    # info : [気温, NN度, NN度, 降水確率, NN%, NN%, NN%, NN%]
+    # In this step info[] has began following,
+    # [気温, N度, N度, 降水確率, N%, N%, N%, N%]
     
     if len(info) == 8:
         info.insert(1, u'最高気温')
         info.insert(3, u'最低気温')
-        info.insert(6, u'0時から6時')
-        info.insert(8, u'6時から12時')
-        info.insert(10, u'12時から18時')
-        info.insert(12, u'18時から24時')
-    else:
-        info = []
+        info.insert(6, u'0時6時')
+        info.insert(8, u'6時12時')
+        info.insert(10, u'12時18時')
+        info.insert(12, u'18時24時')
+        # Finally info[] has began following,
+        # [気温, 最高, N度, 最低, N度, 降水確率, 0時6時, N%, 6時12時, N%, 12時18時, N%, 18時24時, N%]
     
-    # info : [気温, 最高気温, NN, 最低気温, NN, 降水確率, 0時から6時, NN%, 6時から12時, NN%, 12時から18時, NN%, 18時から24時, NN%]
     return info
 
 # speak events.
@@ -216,7 +222,7 @@ def speakEvents():
     # Speak Weather 1
     weatherinfo1 = get_weatherinfo1(weatherurl1)
     if not len(weatherinfo1) == 0:
-        cmd = speaker + ' 140 "' + weatherinfo1 + '"'
+        cmd = speaker + ' 130 "' + weatherinfo1 + '"'
         subprocess.call(cmd.split(), shell=False)
         time.sleep(1)
     
@@ -224,7 +230,7 @@ def speakEvents():
     weatherinfo2 = get_weatherinfo2(weatherurl2)
     if not len(weatherinfo2) == 0:
         for info in weatherinfo2:
-            cmd = speaker + ' 110 "' + info + '"'
+            cmd = speaker + ' 100 "' + info + '"'
             subprocess.call(cmd.split(), shell=False)
         time.sleep(1)
     
