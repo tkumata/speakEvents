@@ -13,6 +13,7 @@ import time
 import os, sys
 import platform
 import requests, re
+import shlex
 
 # Global var
 homeDir = os.path.expanduser('~')
@@ -67,7 +68,7 @@ def afn360(channel):
     foundMplayer = 0
     
     # if this code founds mplayer, kill mplayer and turn on flag.
-    psCmd = subprocess.Popen('ps' 'ax', stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=True)
+    psCmd = subprocess.Popen(['ps', 'ax'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=False)
     out = psCmd.communicate()[0]
     
     # find mplayer process and kill
@@ -82,10 +83,8 @@ def afn360(channel):
     if foundMplayer == 0:
         # If not found mplayer, run mplayer.
         print('=====> start AFN channel: %s.') % AFNchannels[channel]
-        subprocess.Popen(['nohup', 'mplayer', AFNchannels[channel]],
-                         stdout=open('/dev/null', 'w'),
-                         stderr=open(mplayerLog, 'a'),
-                         preexec_fn=os.setpgrp)
+        cmd = 'nohup mplayer ' + AFNchannels[channel] + ''
+        subprocess.Popen(cmd.split(), stdout=open('/dev/null', 'w'), stderr=open(mplayerLog, 'a'), preexec_fn=os.setpgrp)
         
         # change to next channel
         if not 0 <= countButton3 <= len(AFNchannels) - 2:
@@ -217,14 +216,16 @@ def speakEvents():
     # Speak Weather 1
     weatherinfo1 = get_weatherinfo1(weatherurl1)
     if not len(weatherinfo1) == 0:
-        subprocess.call(speaker + ' 140 "' + weatherinfo1 + '"', shell=True)
+        cmd = speaker + ' 140 "' + weatherinfo1 + '"'
+        subprocess.call(cmd.split(), shell=False)
         time.sleep(1)
     
     # Speak Weather 2
     weatherinfo2 = get_weatherinfo2(weatherurl2)
     if not len(weatherinfo2) == 0:
         for info in weatherinfo2:
-            subprocess.call(speaker + ' 110 "' + info + '"', shell=True)
+            cmd = speaker + ' 110 "' + info + '"'
+            subprocess.call(cmd.split(), shell=False)
         time.sleep(1)
     
     # Speak Events
@@ -232,7 +233,8 @@ def speakEvents():
     if len(events) == 0:
         # 一日分のイベントが空
         talk = u'本日の予定はありません。以上'
-        subprocess.call(speaker + ' 120 "' + talk + '"', shell=True)
+        cmd = speaker + ' 120 "' + talk + '"'
+        subprocess.call(cmd.split(), shell=False)
     else:
         events2 = sorted(events, key=lambda x:x['startDate'])    # sort by startDate
         
@@ -246,23 +248,27 @@ def speakEvents():
                     else:
                         eventTime = str(value[4]) + u'時' + str(value[5]) + u'分から'
                     #print eventTime,
-                    subprocess.call(speaker + ' 130 "' + eventTime + '"', shell=True)
+                    cmd = speaker + ' 130 "' + eventTime + '"'
+                    subprocess.call(cmd.split(), shell=False)
                 if key == 'endDate':
                     if value[4] == 0 and value[5] == 0:
                         eventEndTime = u'に、'
                     else:
                         eventEndTime = str(value[4]) + u'時' + str(value[5]) + u'分まで、'
                     #print eventEndTime,
-                    subprocess.call(speaker + ' 130 "' + eventEndTime + '"', shell=True)
+                    cmd = speaker + ' 130 "' + eventEndTime + '"'
+                    subprocess.call(cmd.split(), shell=False)
                 if key == 'title':
                     eventTitle = value + u'の予定があります。'
                     #print eventTitle
-                    subprocess.call(speaker + ' 100 "' + eventTitle + '"', shell=True)
+                    cmd = speaker + ' 100 "' + eventTitle + '"'
+                    subprocess.call(cmd.split(), shell=False)
                     time.sleep(1)
         
         # 一日分のループが終了したら
         endTalk = u'忘れ物はありませんか。以上'
-        subprocess.call(speaker + ' 120 "' + endTalk + '"', shell=True)
+        cmd = speaker + ' 120 "' + endTalk + '"'
+        subprocess.call(cmd.split(), shell=False)
     # End if
     
     # Remove lock file.
