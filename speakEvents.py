@@ -14,10 +14,10 @@ import os, sys
 import platform
 import requests, re
 
-#homeDir = os.path.expanduser("~")
+#homeDir = os.path.expanduser('~')
 configFile = '/home/pi/.speakevents'
-lockFile = "/tmp/speakEventsLockfile"
-mplayerLog = "/tmp/speakEventsMpLogfile"
+lockFile = '/tmp/speakEventsLockfile'
+mplayerLog = '/tmp/speakEventsMpLogfile'
 countButton3 = 0
 
 weatherurl1 = ''
@@ -63,12 +63,14 @@ def afn360(channel):
     f = open(lockFile, 'w')
     f.close()
     
+    # mplayer flag
     foundMplayer = 0
     
     # if this code founds mplayer, kill mplayer and turn on flag.
     psCmd = subprocess.Popen('ps ax', stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=True)
     out = psCmd.communicate()[0]
     
+    # find mplayer process and kill
     for line in out.splitlines():
         if 'mplayer' in line and 'AFN' in line:
             foundMplayer = 1
@@ -79,12 +81,12 @@ def afn360(channel):
     # Play AFN
     if foundMplayer == 0:
         # If not found mplayer, run mplayer.
-        print("=====> start AFN channel: %s.") % AFNchannels[channel]
-        
+        print('=====> start AFN channel: %s.') % AFNchannels[channel]
         subprocess.Popen(['nohup', 'mplayer', AFNchannels[channel]],
                          stdout=open('/dev/null', 'w'),
                          stderr=open(mplayerLog, 'a'),
                          preexec_fn=os.setpgrp)
+        
         # change to next channel
         if not 0 <= countButton3 <= len(AFNchannels) - 2:
             countButton3 = 0
@@ -113,14 +115,16 @@ def get_config():
     if os.path.isfile(configFile):
         parser = SafeConfigParser()
         parser.read(configFile)
-        
+
         userid = parser.get('account', 'user')
         assert isinstance(userid, str)
+
         passwd = parser.get('account', 'pass')
         assert isinstance(passwd, str)
-        
+
         weatherurl1 = parser.get('weatherurls', 'weather1')
         assert isinstance(weatherurl1, str)
+
         weatherurl2 = parser.get('weatherurls', 'weather2')
         assert isinstance(weatherurl2, str)
     else:
@@ -149,12 +153,12 @@ def get_weatherinfo1(url):
     html = req.text
 
     strPattern = r'<h2 class="sub_title">(.*)</p>'
-    tagPattern = re.compile(r"<[^>]*?>")
+    tagPattern = re.compile(r'<[^>]*?>')
 
     matches = re.finditer(strPattern, html)
     
     for match in matches:
-        w = tagPattern.sub("", match.groups()[0])
+        w = tagPattern.sub('', match.groups()[0])
 
     return w
 
@@ -242,26 +246,25 @@ def speakEvents():
                     else:
                         eventTime = str(value[4]) + u'時' + str(value[5]) + u'分から'
                     #print eventTime,
-                    subprocess.call(speaker + " 130 \"" + eventTime + "\"", shell=True)
-                    
+                    subprocess.call(speaker + ' 130 "' + eventTime + '"', shell=True)
                 if key == 'endDate':
                     if value[4] == 0 and value[5] == 0:
                         eventEndTime = u'に、'
                     else:
                         eventEndTime = str(value[4]) + u'時' + str(value[5]) + u'分まで、'
                     #print eventEndTime,
-                    subprocess.call(speaker + " 130 \"" + eventEndTime + "\"", shell=True)
-                    
+                    subprocess.call(speaker + ' 130 "' + eventEndTime + '"', shell=True)
                 if key == 'title':
                     eventTitle = value + u'の予定があります。'
                     #print eventTitle
-                    subprocess.call(speaker + " 100 \"" + eventTitle + "\"", shell=True)
+                    subprocess.call(speaker + ' 100 "' + eventTitle + '"', shell=True)
                     time.sleep(1)
             # End for
         # End for
+        
         # 一日分のループが終了したら
         endTalk = u'忘れ物はありませんか。以上'
-        subprocess.call(speaker + " 120 \"" + endTalk + "\"", shell=True)
+        subprocess.call(speaker + ' 120 "' + endTalk + '"', shell=True)
     # End if
     
     # Remove lock file.
