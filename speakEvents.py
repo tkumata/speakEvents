@@ -21,8 +21,8 @@ configFile = homeDir + '/.speakevents'
 lockFile = '/tmp/speakEventsLockfile'
 mplayerLog = '/tmp/speakEventsMpLogfile'
 countButton3 = 0
-weatherurl1 = 'http://www.tenki.jp/forecast/3/16/'
-weatherurl2 = ''
+weatherurl1 = 'http://www.tenki.jp/forecast/3/16/'                      # Weather info for 'Kanto Plain'
+weatherurl2 = 'http://www.tenki.jp/forecast/3/16/4410/13112-daily.html' # Pinpoint weather info for 'Setagaya-ku'
 userid = ''
 passwd = ''
 
