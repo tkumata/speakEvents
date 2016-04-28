@@ -50,10 +50,10 @@ elif platform.system() == 'Darwin':
 
 # AFN channels
 AFNchannels = ['http://14023.live.streamtheworld.com/AFNP_TKO',
-               'http://14093.live.streamtheworld.com/AFN_JOE',
-               'http://4533.live.streamtheworld.com/AFN_PTK',
-               'http://6073.live.streamtheworld.com/AFN_VCE',
-               'http://14963.live.streamtheworld.com/AFN_FRE'
+             'http://14093.live.streamtheworld.com/AFN_JOE',
+             'http://4533.live.streamtheworld.com/AFN_PTK',
+             'http://6073.live.streamtheworld.com/AFN_VCE',
+             'http://14963.live.streamtheworld.com/AFN_FRE'
 ]
 
 # AFN360 procedure, play and stop
