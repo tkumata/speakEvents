@@ -258,9 +258,9 @@ def speakEvents():
                     subprocess.call(cmd.split(), shell=False)
                 if key == 'endDate':
                     if value[4] == 0 and value[5] == 0:
-                        eventEndTime = u'に、'
+                        eventEndTime = u'、'
                     else:
-                        eventEndTime = str(value[4]) + u'時' + str(value[5]) + u'分まで、'
+                        eventEndTime = str(value[4]) + u'時' + str(value[5]) + u'分まで'
                     #print eventEndTime,
                     cmd = speaker + ' 130 "' + eventEndTime + '"'
                     subprocess.call(cmd.split(), shell=False)
@@ -273,7 +273,7 @@ def speakEvents():
         
         # 一日分のループが終了したら
         endTalk = u'忘れ物はありませんか。以上'
-        cmd = speaker + ' 120 "' + endTalk + '"'
+        cmd = speaker + ' 100 "' + endTalk + '"'
         subprocess.call(cmd.split(), shell=False)
     # End if
     
