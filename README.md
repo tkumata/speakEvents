@@ -1,8 +1,10 @@
-# ゆっくりが予定を喋ったり、AFN を流したりする IoT
+# ゆっくりが予定や天気情報を喋ったり、AFN 360 を再生したりする IoT
 
 
 ## 説明
 Raspberry Pi 3 (以下 RPi3) に BLE やボタンなどから何かしらの入力があった時、tenki.jp の天気情報や iCloud 内の当日の全予定を音声でお知らせします。音声なので忙しい場合でも、何かしながら予定の確認ができます。また、付録機能として AFN 360 の再生ができます。
+
+[動画](images/IMG0054.m4v)
 
 今回はお気楽極楽に、入力として GrovePi+ を使うことにしました。GrovePi+ の D2, D3 port にボタンを接続します。D2 port のボタンは天気情報と iCloud Calendar を読み上げ、D3 port のボタンは AFN 360 を再生します。もし既に再生中だった場合、停止します。
 
@@ -13,8 +15,6 @@ RPi3 を再起動してもこのプログラムが動くように sh を追加�
 再生(Tokyo)、停止、再生(Joe Radio)、停止、再生(Power Talk)、停止、再生(The Voice)、停止、再生(Freedom)、停止、再生(Tokyo)...
 
 となります。
-
-[動画](images/IMG0054.m4v)
 
 [![the thing](images/IMG0047.png)](images/IMG0054.m4v)
 
@@ -39,9 +39,10 @@ RPi3 を再起動してもこのプログラムが動くように sh を追加�
 4. Create wrapper (eg, vi atalk.sh).
 5. git clone git@github.com:tkumata/speakEvents.git
 6. touch /home/pi/.speakevents && chmod 600 /home/pi/.speakevents && vi /home/pi/.speakevents (Please see below.)
-7. Adjust "speakEvents.py" (eg, path etc...)
-8. sudo cp speakEventsService.sh /etc/init.d/
+7. Adjust "speakEvents/speakEvents.py" (eg, path etc...)
+8. sudo cp speakEvents/speakEventsService.sh /etc/init.d/
 9. sudo update-rc.d speakEventsService.sh defaults
+10. sudo /etc/init.d/speakEventsService.sh start
 
 
 - example atalk.sh
