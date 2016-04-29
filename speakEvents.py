@@ -3,7 +3,6 @@
 import grovepi
 from pyicloud import PyiCloudService        # pip install pyicloud
 from ConfigParser import SafeConfigParser
-#from pprint import pprint
 from distutils import spawn
 import datetime
 import locale
@@ -27,12 +26,14 @@ userid = ''
 passwd = ''
 
 # Init GrovePi+ ports.
-button2 = 2
-button3 = 3
-#button4 = 4
-grovepi.pinMode(button2, 'INPUT')
-grovepi.pinMode(button3, 'INPUT')
-#grovepi.pinMode(button4, 'OUTPUT')
+port2 = 2   # button
+port3 = 3   # button
+#port4 = 4   # LED
+#port5 = 5   # RGB LED
+grovepi.pinMode(port2, 'INPUT')
+grovepi.pinMode(port3, 'INPUT')
+#grovepi.pinMode(port4, 'OUTPUT')
+#grovepi.pinMode(port5, 'OUTPUT')
 
 # Check text speaker
 if platform.system() == 'Linux':
@@ -97,6 +98,9 @@ def afn360(channel):
     
     # Remove lock file.
     os.remove(lockFile)
+    
+    # LED OFF
+    #grovepi.digitalWrite(port4, 0)
 
 # check config file and get iCloud API.
 #
@@ -279,6 +283,9 @@ def speakEvents():
     
     # Remove lock file.
     os.remove(lockFile)
+    
+    # LED OFF
+    #grovepi.digitalWrite(port4, 0)
 
 #
 # main
@@ -286,24 +293,21 @@ def speakEvents():
 if __name__ == '__main__':
     while True:
         try:
-            if grovepi.digitalRead(button2) == 1:
-                print('=====> push D2')
-                
+            if grovepi.digitalRead(port2) == 1:
+                print('=====> push D%d') % port2
+                #grovepi.digitalWrite(port4, 1)
                 if not os.path.exists(lockFile):
                     speakEvents()
                 else:
                     print('=====> locking...')
-                
-            if grovepi.digitalRead(button3) == 1:
-                print('=====> push D3')
-                
+            if grovepi.digitalRead(port3) == 1:
+                print('=====> push D%d') % port3
+                #grovepi.digitalWrite(port4, 1)
                 if not os.path.exists(lockFile):
                     afn360(countButton3)
                 else:
                     print('=====> locking...')
-                
             time.sleep(.1)
-            
         except IOError:
             print('=====> IO Error.')
             quit()
