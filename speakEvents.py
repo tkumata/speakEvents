@@ -26,14 +26,45 @@ userid = ''
 passwd = ''
 
 # Init GrovePi+ ports.
-port2 = 2   # button
-port3 = 3   # button
-#port4 = 4   # LED
-#port5 = 5   # RGB LED
-grovepi.pinMode(port2, 'INPUT')
-grovepi.pinMode(port3, 'INPUT')
-#grovepi.pinMode(port4, 'OUTPUT')
-#grovepi.pinMode(port5, 'OUTPUT')
+dport2 = 2  # button
+dport3 = 3  # button
+dport4 = 4  # LED
+dport5 = 5  # RGB LED
+numleds = 1 # Num of chain LED
+#aport0 = 0  # rotary analog sensor
+grovepi.pinMode(dport2, 'INPUT')
+grovepi.pinMode(dport3, 'INPUT')
+grovepi.pinMode(dport4, 'OUTPUT')
+grovepi.pinMode(dport5, 'OUTPUT')
+#grovepi.pinMode(aport0, 'INPUT')
+
+# init chain of leds
+grovepi.chainableRgbLed_init(dport5, numleds)
+
+# test colors used in grovepi.chainableRgbLed_test()
+testColorBlack = 0   # 0b000 #000000
+testColorBlue = 1    # 0b001 #0000FF
+testColorGreen = 2   # 0b010 #00FF00
+testColorCyan = 3    # 0b011 #00FFFF
+testColorRed = 4     # 0b100 #FF0000
+testColorMagenta = 5 # 0b101 #FF00FF
+testColorYellow = 6  # 0b110 #FFFF00
+testColorWhite = 7   # 0b111 #FFFFFF
+
+# patterns used in grovepi.chainableRgbLed_pattern()
+thisLedOnly = 0
+allLedsExceptThis = 1
+thisLedAndInwards = 2
+thisLedAndOutwards = 3
+
+# Reference voltage of ADC is 5v
+adc_ref = 5
+
+# Vcc of the grove interface is normally 5v
+grove_vcc = 5
+
+# Full value of the rotary angle is 300 degrees, as per it's specs (0 to 300)
+full_angle = 300
 
 # Check text speaker
 if platform.system() == 'Linux':
@@ -79,9 +110,15 @@ def afn360(channel):
             print('=====> stop AFN.')
             pid = int(line.split(None, 1)[0])
             os.kill(pid, signal.SIGKILL)
+            
+            # all chain LED turn off
+            grovepi.chainableRgbLed_test(dport5, numleds, testColorBlack)
     
     # Play AFN
     if foundMplayer == 0:
+        # LED turn on
+        grovepi.chainableRgbLed_test(dport5, numleds, countButton3+1)
+        
         # If not found mplayer, run mplayer.
         print('=====> start AFN channel: %s.') % AFNchannels[channel]
         cmd = 'nohup mplayer ' + AFNchannels[channel]
@@ -99,9 +136,9 @@ def afn360(channel):
     # Remove lock file.
     os.remove(lockFile)
     
-    # LED OFF
-    #grovepi.digitalWrite(port4, 0)
-
+    # feedback LED turn off
+    grovepi.digitalWrite(dport4, 0)
+#
 # check config file and get iCloud API.
 #
 # touch ~/.pyicloud && chmod 600 ~/.pyicloud && vi ~/.pyicloud
@@ -236,8 +273,14 @@ def speakEvents():
         for info in weatherinfo2:
             cmd = speaker + ' 100 "' + info + '"'
             subprocess.call(cmd.split(), shell=False)
+        
         time.sleep(1)
     
+    # blink LED
+    grovepi.digitalWrite(dport4, 0)
+    time.sleep(.3)
+    grovepi.digitalWrite(dport4, 1)
+
     # Speak Events
     events = get_iccdata()
     if len(events) == 0:
@@ -284,30 +327,50 @@ def speakEvents():
     # Remove lock file.
     os.remove(lockFile)
     
-    # LED OFF
-    #grovepi.digitalWrite(port4, 0)
+    # feedback LED turn off
+    grovepi.digitalWrite(dport4, 0)
 
-#
 # main
-#
 if __name__ == '__main__':
     while True:
         try:
-            if grovepi.digitalRead(port2) == 1:
-                print('=====> push D%d') % port2
-                #grovepi.digitalWrite(port4, 1)
+            # Read sensor value from potentiometer
+#            sensor_value = grovepi.analogRead(aport0)
+            
+            # Calculate voltage
+#            voltage = round((float)(sensor_value) * adc_ref / 1023, 2)
+            
+            # Calculate rotation in degrees (0 to 300)
+#            degrees = round((voltage * full_angle) / grove_vcc, 2)
+            
+            # Calculate LED brightess (0 to 255) from degrees (0 to 300)
+#            brightness = int(degrees / full_angle * 255)
+            
+            if grovepi.digitalRead(dport2) == 1:
+                print('=====> push D%d') % dport2
+                # feedback LED turn on
+                grovepi.digitalWrite(dport4, 1)
+                # speakEvents
                 if not os.path.exists(lockFile):
                     speakEvents()
                 else:
                     print('=====> locking...')
-            if grovepi.digitalRead(port3) == 1:
-                print('=====> push D%d') % port3
-                #grovepi.digitalWrite(port4, 1)
+            if grovepi.digitalRead(dport3) == 1:
+                print('=====> push D%d') % dport3
+                # feedback LED turn on
+                grovepi.digitalWrite(dport4, 1)
+                # play AFN 360
                 if not os.path.exists(lockFile):
                     afn360(countButton3)
                 else:
                     print('=====> locking...')
             time.sleep(.1)
+        except KeyboardInterrupt:
+            grovepi.digitalWrite(dport4, 0)
+            grovepi.chainableRgbLed_test(dport5, numleds, testColorBlack)
+            break
         except IOError:
             print('=====> IO Error.')
+            grovepi.digitalWrite(dport4, 0)
+            grovepi.chainableRgbLed_test(dport5, numleds, testColorBlack)
             quit()

@@ -2,17 +2,19 @@
 
 
 ## 説明
-Raspberry Pi 3 (以下 RPi3) に BLE やボタンなどから何かしらの入力があった時、tenki.jp の天気情報や iCloud 内の当日の全予定を音声でお知らせします。音声なので忙しい場合でも、何かしながら予定の確認ができます。また、付録機能として AFN 360 の再生ができます。
+Raspberry Pi 3 (以下 RPi3) に BLE やボタンなどから何かしらの入力があった時、以下のことをします。
 
-[動画](images/IMG0054.m4v)
+- tenki.jp の天気情報を音声でお知らせ
+- iCloud 内の当日の全予定を音声でお知らせ
+- AFN 360 の再生 (RGB LED でチャンネル毎に色を変える)
 
-今回はお気楽極楽に、入力として GrovePi+ を使うことにしました。GrovePi+ の D2, D3 port にボタンを接続します。D2 port のボタンは天気情報と iCloud Calendar を読み上げ、D3 port のボタンは AFN 360 を再生します。もし既に再生中だった場合、停止します。
+音声なので忙しい場合でも、何かしながら予定の確認ができます。
 
-RPi3 を再起動してもこのプログラムが動くように sh を追加しました。なのでこれ単体で機能します。
+今回はお気楽極楽に、入力として GrovePi+ を使うことにしました。GrovePi+ の D2, D3 port にボタンを接続します。D4 port にはボタンを押した時のフィードバック用 LED を接続し、D5 port に RGB LED を接続します。D2 port のボタンは天気情報と iCloud Calendar を読み上げ、D3 port のボタンは AFN 360 を再生します。もし既に再生中だった場合、停止します。
 
-再生のたびに AFN のチャンネルを変更するようにしました。具体的には...
+AFN のチャンネルは...
 
-再生(Tokyo)、停止、再生(Joe Radio)、停止、再生(Power Talk)、停止、再生(The Voice)、停止、再生(Freedom)、停止、再生(Tokyo)...
+再生(Tokyo:青色)、停止、再生(Joe Radio:緑色)、停止、再生(Power Talk:シアン色)、停止、再生(The Voice:赤色)、停止、再生(Freedom:マジェンダ色)、停止、再生(Tokyo:青色)...
 
 となります。
 
@@ -22,11 +24,13 @@ RPi3 を再起動してもこのプログラムが動くように sh を追加�
 ## 必要なハード
 1. Raspberry Pi (Well, I use RPi3 model B.)
 2. GrovePi+
-3. Two buttons for Grove
+3. Two buttons for Grove (D2, D3)
+4. LED (D4)
+5. Chainable RGB LED (D5)
 
 
 ## 必要なソフト
-1. OS として [Raspbian for Robots](http://www.dexterindustries.com/howto/install-raspbian-for-robots-image-on-an-sd-card/) (RPi3 と素の Raspbian の組み合わせだと Grove の反応が超絶イマイチで、粗悪品のボタンを掴んだか？って勘違いするほどです。ハマりました。2016/04/12 時点で GrovePi と RPi3 の組み合わせを使うなら OS は Raspbian for Robots がオススメです。RPi2 は分かりません。)
+1. OS として [Raspbian for Robots](http://www.dexterindustries.com/howto/install-raspbian-for-robots-image-on-an-sd-card/) (RPi3 と素の Raspbian の組み合わせだと Grove の反応が超絶イマイチで、粗悪品のボタンを掴んだか？って勘違いするほどです。ハマりました。2016/04/12 時点で GrovePi+ と RPi3 の組み合わせを使うなら OS は Raspbian for Robots がオススメです。RPi2 は分かりません。)
 2. Python module の pyicloud
 3. テキスト読み上げソフトとして [AquesTalkPi](http://www.a-quest.com/products/aquestalkpi.html) (AquesTalkPi なら日本語も喋ってくれるし、英語もアルファベット読みにならないので。)
 4. Wrapper for AquesTalkPi (eg, atalk.sh) (AquesTalkPi は wav を作るだけなので aplay で再生するようにラッパを作成する必要があります。)
@@ -83,6 +87,10 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 - ロータリーかスライダーで AFN のチャンネルを選択できるようにしたい。
 - 折角の RPi3 なので BLE でコントロールできるようにしたい。
 - ニュースヘッドラインも追加したい。
+
+
+## 過去の版
+[ver1](https://github.com/tkumata/speakEvents/tree/ver1x)
 
 
 ## ライセンス
