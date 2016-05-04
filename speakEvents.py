@@ -85,21 +85,17 @@ AFNchannels = ['http://14023.live.streamtheworld.com/AFNP_TKO',
                'http://14963.live.streamtheworld.com/AFN_FRE'
 ]
 
+# Kill mplayer
 def killMplayer():
-    # if this code founds mplayer, kill mplayer and turn on flag.
     psCmd = subprocess.Popen(['ps', 'ax'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=False)
     out = psCmd.communicate()[0]
-
-    # find mplayer process and kill
     for line in out.splitlines():
         if 'mplayer' in line and 'AFN' in line:
-            foundMplayer = 1
-            print('=====> stop AFN.')
             pid = int(line.split(None, 1)[0])
             os.kill(pid, signal.SIGKILL)
-
-            # all chain LED turn off
             grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
+            time.sleep(.5)
+
 
 # AFN360 procedure, play and stop
 def afn360(channel):
@@ -349,27 +345,24 @@ if __name__ == '__main__':
         try:
             [new_val,encoder_val] = grovepi.encoderRead()
             if new_val:
-                time.sleep(1)
+#                print(encoder_val)
+                time.sleep(3)
                 if 1 <= encoder_val <= 4:
-                    print(encoder_val)
                     killMplayer()
                     afn360(0)
                 elif 5 <= encoder_val <= 9:
-                    print(encoder_val)
                     killMplayer()
                     afn360(1)
                 elif 10 <= encoder_val <= 14:
-                    print(encoder_val)
                     killMplayer()
                     afn360(2)
                 elif 15 <= encoder_val <= 19:
-                    print(encoder_val)
                     killMplayer()
                     afn360(3)
                 elif 20 <= encoder_val <= 24:
-                    print(encoder_val)
                     killMplayer()
                     afn360(4)
+
             if grovepi.digitalRead(icloudbtn) == 1:
                 print('=====> push D%d') % icloudbtn
                 # feedback LED turn on
@@ -379,6 +372,7 @@ if __name__ == '__main__':
                     speakEvents()
                 else:
                     print('=====> locking...')
+
             if grovepi.digitalRead(afn360btn) == 1:
                 print('=====> push D%d') % afn360btn
                 # feedback LED turn on
@@ -389,9 +383,11 @@ if __name__ == '__main__':
                 else:
                     print('=====> locking...')
             time.sleep(.1)
+
         except KeyboardInterrupt:
             grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
             grovepi.digitalWrite(feedLED, 0)
             break
+
         except IOError:
             print('=====> IO Error.')

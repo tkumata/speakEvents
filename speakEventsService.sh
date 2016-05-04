@@ -20,8 +20,8 @@ eval cd ~$USER
 do_start() {
     # if it's start, then start vncserver using the details below
     echo "Starting spaekEvents for $USER..."
-    # su $USER -c 'nohup /home/pi/bin/speakEvents/speakEvents.py > /dev/null 2>&1 &'
-    su $USER -c 'nohup python -u /home/pi/bin/speakEvents/speakEvents.py > /tmp/speakEvents.log &'
+    su $USER -c 'nohup /home/pi/bin/speakEvents/speakEvents.py > /dev/null 2>&1 &'
+    # su $USER -c 'nohup python -u /home/pi/bin/speakEvents/speakEvents.py > /tmp/speakEvents.log &'
     echo "speakEvents starts."
 }
 
