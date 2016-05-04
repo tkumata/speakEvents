@@ -19,8 +19,8 @@ import atexit
 homeDir = os.path.expanduser('~')
 configFile = homeDir + '/.speakevents'
 lockFile = '/tmp/speakEventsLockfile'
+lockFileM = '/tmp/speakEventsLockfileM'
 mplayerLog = '/tmp/speakEventsMpLogfile'
-countButton3 = 0
 weatherurl1 = 'http://www.tenki.jp/forecast/3/16/'                      # Weather info for 'Kanto Plain'
 weatherurl2 = 'http://www.tenki.jp/forecast/3/16/4410/13112-daily.html' # Pinpoint weather info for 'Setagaya-ku'
 userid = ''
@@ -40,6 +40,9 @@ grovepi.pinMode(icloudbtn, 'INPUT')
 grovepi.pinMode(afn360btn, 'INPUT')
 grovepi.pinMode(rgbLED, 'OUTPUT')
 grovepi.pinMode(feedLED, 'OUTPUT')
+
+# Init LED off
+grovepi.digitalWrite(feedLED, 0)
 
 # Init chain of leds
 grovepi.chainableRgbLed_init(rgbLED, numLEDs)
@@ -90,29 +93,39 @@ AFNchannels = ['http://14023.live.streamtheworld.com/AFNP_TKO',
 def killMplayer():
     psCmd = subprocess.Popen(['ps', 'ax'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=False)
     out = psCmd.communicate()[0]
+    
     for line in out.splitlines():
         if 'mplayer' in line and 'AFN' in line:
             pid = int(line.split(None, 1)[0])
             os.kill(pid, signal.SIGKILL)
-            grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
-    # If found mplayer, remove mplayer log file.
+    
     if os.path.exists(mplayerLog):
         os.remove(mplayerLog)
-
+    
+    grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
 
 # AFN360 procedure, play and stop
 def afn360(channel, onoff):
+    # create lock file
+    f = open(lockFileM, 'w')
+    f.close()
+    
     if onoff == 1:
         killMplayer()
+        
         # LED turn on
         grovepi.chainableRgbLed_test(rgbLED, numLEDs, channel+1)
+        
         # If not found mplayer, run mplayer.
         print('=====> start AFN channel: %s.') % AFNchannels[channel]
         cmd = 'nohup mplayer ' + AFNchannels[channel]
         subprocess.Popen(cmd.split(), stdout=open('/dev/null', 'w'), stderr=open(mplayerLog, 'a'), preexec_fn=os.setpgrp)
     else:
         killMplayer()
-
+    
+    # Remove lock file.
+    os.remove(lockFileM)
+    
     # feedback LED turn off
     grovepi.digitalWrite(feedLED, 0)
 
@@ -314,23 +327,11 @@ if __name__ == '__main__':
     while True:
         try:
             if afn_on == 1:
-                [new_val,encoder_val] = grovepi.encoderRead()
+                [new_val, encoder_val] = grovepi.encoderRead()
                 if new_val:
-                    print(encoder_val)
-                    if encoder_val == 0:
-                        countButton3 = 0
-                    elif encoder_val == 1:
-                        countButton3 = 1
-                    elif encoder_val == 2:
-                        countButton3 = 2
-                    elif encoder_val == 3:
-                        countButton3 = 3
-                    elif encoder_val == 4:
-                        countButton3 = 4
-                    else:
-                        pass
-                    time.sleep(2)
-                    afn360(countButton3, afn_on)
+                    print('=====> encoder value %d') % encoder_val
+                    if not os.path.exists(lockFileM):
+                        afn360(encoder_val, afn_on)
             
             if grovepi.digitalRead(icloudbtn) == 1:
                 print('=====> push D%d') % icloudbtn
@@ -346,13 +347,16 @@ if __name__ == '__main__':
                 print('=====> push D%d') % afn360btn
                 # feedback LED turn on
                 grovepi.digitalWrite(feedLED, 1)
-                if afn_on == 0:
-                    afn_on = 1
-                    [new_val,encoder_val] = grovepi.encoderRead()
-                    afn360(encoder_val, afn_on)
+                if not os.path.exists(lockFileM):
+                    if afn_on == 0:
+                        [new_val, encoder_val] = grovepi.encoderRead()
+                        afn_on = 1
+                        afn360(encoder_val, afn_on)
+                    else:
+                        afn_on = 0
+                        afn360(0, afn_on)
                 else:
-                    afn_on = 0
-                    afn360(countButton3, afn_on)
+                    print('=====> locking...')
 
             time.sleep(.1)
 

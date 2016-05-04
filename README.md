@@ -13,17 +13,21 @@ Raspberry Pi 3 (以下 RPi3) に BLE やボタンなどから何かしらの入�
 今回はお気楽極楽に、入力として GrovePi+ を使うことにしました。GrovePi+ の
 
 - D2 port に Encoder
-- D4, D5 port にボタンを接続 (D2 のボタンは天気情報と iCloud Calendar を読み上げ、D3 のボタンは AFN 360 を再生します。もし既に再生中だった場合、停止します。)
-- D7 port に RGB LED を接続
+- D4 port にボタンを接続 (天気情報と iCloud Calendar を読み上げます。)
+- D5 port にボタンを接続 (AFN 360 を再生します。もし既に再生中だった場合、停止します。)
+- D7 port に Chainable RGB LED を接続
 - D8 port に LED を接続 (ボタンを押した時のフィードバック用で普通の LED)
 
 AFN のチャンネルは Encoder の...
 
-- 0:Tokyo:青色
-- 1:Joe Radio:緑色
-- 2:Power Talk:シアン色
-- 3:The Voice:赤色
-- 4:Freedom:マジェンダ色
+| Step | Channnel   | Color        |
+|------|:----------:|:-------------|
+| 0    | Tokyo      | 青色 |
+| 1    | Joe Radio  | 緑色 |
+| 2    | Power Talk | シアン色 |
+| 3    | The Voice  | 赤色 |
+| 4    | Freedom    | マジェンダ色 |
+| 5-24 | 未定       | 未定 |
 
 となります。
 
@@ -31,12 +35,12 @@ AFN のチャンネルは Encoder の...
 
 
 ## 必要なハード
-1. Raspberry Pi (Well, I use RPi3 model B.)
-2. GrovePi+ !!! IMPORTANT !!! Firmware is v1.2.5 over and apply patch.
+1. Raspberry Pi 3
+2. GrovePi+ (!!! IMPORTANT !!! Firmware is v1.2.5 over and apply patch.)
 3. Two buttons for Grove (D4, D5)
-4. LED (D8)
-5. Chainable RGB LED (D7)
-6. Encoder (D2) !!! IMPORTANT !!! Grove Encoder works on only D2 port.
+4. Chainable RGB LED (D7)
+5. LED (D8)
+6. Encoder (D2) (!!! IMPORTANT !!! Grove Encoder works on only D2 port.)
 
 
 ## 必要なソフト
@@ -44,6 +48,7 @@ AFN のチャンネルは Encoder の...
 2. Python module の pyicloud
 3. テキスト読み上げソフトとして [AquesTalkPi](http://www.a-quest.com/products/aquestalkpi.html) (AquesTalkPi なら日本語も喋ってくれるし、英語もアルファベット読みにならないので。)
 4. Wrapper for AquesTalkPi (eg, atalk.sh) (AquesTalkPi は wav を作るだけなので aplay で再生するようにラッパを作成する必要があります。)
+5. Firmware which patched v1.2.5 or patched v1.2.6.
 
 
 ## 導入
@@ -93,7 +98,7 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 ```
 
 
-- Firmware patch
+- Firmware patch for v1.2.6
 ```
 — src/grove_pi_v1_2_6.ino  2016-05-04 09:09:57.028214361 +0900
 +++ /home/pi/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/grove_pi_v1_2_6.ino   2016-04-23 20:35:48.636875637 +0900
@@ -111,14 +116,14 @@ flag=1;
 
 - Compile firmware v1.2.6 and install
 ```
-mkdir firmware && cd firmware
-ino init
-rm src/sketch.ino
-cp -a ~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/* src/
-ino list-models
-ino build -m atmega328
-cd .build/atmega328
-avrdude -c gpio -p m328p -U flash:w:firmware.hex
+$ mkdir firmware && cd firmware
+$ ino init
+$ rm src/sketch.ino
+$ cp -a ~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/* src/
+$ ino list-models
+$ ino build -m atmega328
+$ cd .build/atmega328
+$ avrdude -c gpio -p m328p -U flash:w:firmware.hex
 ```
 
 
