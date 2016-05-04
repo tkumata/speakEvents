@@ -64,6 +64,7 @@ AFN のチャンネルは Encoder の...
 10. sudo /etc/init.d/speakEventsService.sh start
 
 
+
 - example atalk.sh
 
 AquesTalkPi が作った wav データを再生する wrapper の例です。
