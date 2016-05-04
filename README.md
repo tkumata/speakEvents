@@ -126,6 +126,7 @@ avrdude -c gpio -p m328p -U flash:w:firmware.hex
 
 
 ## 過去の版
+[ver2](https://github.com/tkumata/speakEvents/tree/ver2x)
 [ver1](https://github.com/tkumata/speakEvents/tree/ver1x)
 
 
