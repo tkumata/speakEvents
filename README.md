@@ -10,23 +10,29 @@ Raspberry Pi 3 (以下 RPi3) に BLE やボタンなどから何かしらの入�
 
 音声なので忙しい場合でも、何かしながら予定の確認ができます。
 
-今回はお気楽極楽に、入力として GrovePi+ を使うことにしました。GrovePi+ の D2, D3 port にボタンを接続します。D4 port にはボタンを押した時のフィードバック用 LED を接続し、D5 port に RGB LED を接続します。D2 port のボタンは天気情報と iCloud Calendar を読み上げ、D3 port のボタンは AFN 360 を再生します。もし既に再生中だった場合、停止します。
+今回はお気楽極楽に、入力として GrovePi+ を使うことにしました。GrovePi+ の
+
+- D2 port に Encoder
+- D4, D5 port にボタンを接続 (D2 のボタンは天気情報と iCloud Calendar を読み上げ、D3 のボタンは AFN 360 を再生します。もし既に再生中だった場合、停止します。)
+- D7 port に RGB LED を接続
+- D8 port に LED を接続 (ボタンを押した時のフィードバック用で普通の LED)
 
 AFN のチャンネルは...
 
 再生(Tokyo:青色)、停止、再生(Joe Radio:緑色)、停止、再生(Power Talk:シアン色)、停止、再生(The Voice:赤色)、停止、再生(Freedom:マジェンダ色)、停止、再生(Tokyo:青色)...
 
-となります。
+となります。もしくは Encoder のつまみを回します。
 
 [![the thing](images/IMG0047.png)](images/IMG0054.m4v)
 
 
 ## 必要なハード
 1. Raspberry Pi (Well, I use RPi3 model B.)
-2. GrovePi+
-3. Two buttons for Grove (D2, D3)
-4. LED (D4)
-5. Chainable RGB LED (D5)
+2. GrovePi+ !!! IMPORTANT !!! Firmware is v1.2.5 over and apply patch.
+3. Two buttons for Grove (D4, D5)
+4. LED (D8)
+5. Chainable RGB LED (D7)
+6. Encoder (D2) !!! IMPORTANT !!! Grove Encoder works on only D2 port.
 
 
 ## 必要なソフト
@@ -80,6 +86,36 @@ pass = your_appleid_password
 [weatherurls]
 weather1 = http://www.tenki.jp/forecast/3/16/
 weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
+```
+
+
+- Firmware patch
+```
+— src/grove_pi_v1_2_6.ino  2016-05-04 09:09:57.028214361 +0900
++++ /home/pi/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/grove_pi_v1_2_6.ino   2016-04-23 20:35:48.636875637 +0900
+@@ -96,7 +96,7 @@
+void loop()
+{
+long dur,RangeCm;
+– if(index==4 && flag==0)
++ if(index==4)
+{
+flag=1;
+//IR reciever pin set command
+```
+
+
+- Compile firmware v1.2.6 and install
+
+```
+mkdir firmware && cd firmware
+ino init
+rm src/sketch.ino
+cp -a ~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/* src/
+ino list-models
+ino build -m atmega328
+cd .build/atmega328
+avrdude -c gpio -p m328p -U flash:w:firmware.hex
 ```
 
 
