@@ -6,7 +6,7 @@ from ConfigParser import SafeConfigParser
 from distutils import spawn
 import datetime
 import locale
-import json
+#import json
 import subprocess, signal
 import time
 import os, sys
@@ -25,15 +25,16 @@ weatherurl1 = 'http://www.tenki.jp/forecast/3/16/'                      # Weathe
 weatherurl2 = 'http://www.tenki.jp/forecast/3/16/4410/13112-daily.html' # Pinpoint weather info for 'Setagaya-ku'
 userid = ''
 passwd = ''
+afn_on = 0
 
 # Set GrovePi+ ports.
-encoder2 = 2  # encoder. if you use, update firmware to v1.2.6.
-encoder3 = 3  # encoder. if you use, update firmware to v1.2.6.
-icloudbtn = 4  # button iCloud
-afn360btn = 5  # button AFN
-rgbLED = 7  # RGB LED. if you use, update firmware to v1.2.6
-feedLED = 8  # LED
-numLEDs = 1 # Num of chain LED
+encoder2 = 2    # encoder. if you use it, update firmware to patched v1.2.6. And Encoder work only D2 port.
+encoder3 = 3    # encoder. if you use it, update firmware to patched v1.2.6.
+icloudbtn = 4   # button iCloud
+afn360btn = 5   # button AFN
+rgbLED = 7      # RGB LED. if you use it with Encoder, update firmware to patched v1.2.6
+feedLED = 8     # LED
+numLEDs = 1     # Num of chain LED
 
 grovepi.pinMode(icloudbtn, 'INPUT')
 grovepi.pinMode(afn360btn, 'INPUT')
@@ -94,59 +95,28 @@ def killMplayer():
             pid = int(line.split(None, 1)[0])
             os.kill(pid, signal.SIGKILL)
             grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
-            time.sleep(.5)
+    # If found mplayer, remove mplayer log file.
+    if os.path.exists(mplayerLog):
+        os.remove(mplayerLog)
 
 
 # AFN360 procedure, play and stop
-def afn360(channel):
-    global countButton3
-    
-    # create lock file.
-    f = open(lockFile, 'w')
-    f.close()
-    
-    # mplayer flag
-    foundMplayer = 0
-    
-    # if this code founds mplayer, kill mplayer and turn on flag.
-    psCmd = subprocess.Popen(['ps', 'ax'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=False)
-    out = psCmd.communicate()[0]
-    
-    # find mplayer process and kill
-    for line in out.splitlines():
-        if 'mplayer' in line and 'AFN' in line:
-            foundMplayer = 1
-            print('=====> stop AFN.')
-            pid = int(line.split(None, 1)[0])
-            os.kill(pid, signal.SIGKILL)
-            
-            # all chain LED turn off
-            grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
-    
-    # Play AFN
-    if foundMplayer == 0:
+def afn360(channel, onoff):
+    if onoff == 1:
+        killMplayer()
         # LED turn on
         grovepi.chainableRgbLed_test(rgbLED, numLEDs, channel+1)
-        
         # If not found mplayer, run mplayer.
         print('=====> start AFN channel: %s.') % AFNchannels[channel]
         cmd = 'nohup mplayer ' + AFNchannels[channel]
         subprocess.Popen(cmd.split(), stdout=open('/dev/null', 'w'), stderr=open(mplayerLog, 'a'), preexec_fn=os.setpgrp)
-        
-        # change to next channel
-        if 0 <= countButton3 <= len(AFNchannels) - 2:
-            countButton3 = channel + 1
-        else:
-            countButton3 = 0
     else:
-        # If found mplayer, remove mplayer log file.
-        os.remove(mplayerLog)
-    
-    # Remove lock file.
-    os.remove(lockFile)
-    
+        killMplayer()
+
     # feedback LED turn off
     grovepi.digitalWrite(feedLED, 0)
+
+
 #
 # check config file and get iCloud API.
 #
@@ -343,26 +313,25 @@ def speakEvents():
 if __name__ == '__main__':
     while True:
         try:
-            [new_val,encoder_val] = grovepi.encoderRead()
-            if new_val:
-#                print(encoder_val)
-                time.sleep(3)
-                if 1 <= encoder_val <= 4:
-                    killMplayer()
-                    afn360(0)
-                elif 5 <= encoder_val <= 9:
-                    killMplayer()
-                    afn360(1)
-                elif 10 <= encoder_val <= 14:
-                    killMplayer()
-                    afn360(2)
-                elif 15 <= encoder_val <= 19:
-                    killMplayer()
-                    afn360(3)
-                elif 20 <= encoder_val <= 24:
-                    killMplayer()
-                    afn360(4)
-
+            if afn_on == 1:
+                [new_val,encoder_val] = grovepi.encoderRead()
+                if new_val:
+                    print(encoder_val)
+                    if encoder_val == 0:
+                        countButton3 = 0
+                    elif encoder_val == 1:
+                        countButton3 = 1
+                    elif encoder_val == 2:
+                        countButton3 = 2
+                    elif encoder_val == 3:
+                        countButton3 = 3
+                    elif encoder_val == 4:
+                        countButton3 = 4
+                    else:
+                        pass
+                    time.sleep(2)
+                    afn360(countButton3, afn_on)
+            
             if grovepi.digitalRead(icloudbtn) == 1:
                 print('=====> push D%d') % icloudbtn
                 # feedback LED turn on
@@ -372,16 +341,19 @@ if __name__ == '__main__':
                     speakEvents()
                 else:
                     print('=====> locking...')
-
+            
             if grovepi.digitalRead(afn360btn) == 1:
                 print('=====> push D%d') % afn360btn
                 # feedback LED turn on
                 grovepi.digitalWrite(feedLED, 1)
-                # play AFN 360
-                if not os.path.exists(lockFile):
-                    afn360(countButton3)
+                if afn_on == 0:
+                    afn_on = 1
+                    [new_val,encoder_val] = grovepi.encoderRead()
+                    afn360(encoder_val, afn_on)
                 else:
-                    print('=====> locking...')
+                    afn_on = 0
+                    afn360(countButton3, afn_on)
+
             time.sleep(.1)
 
         except KeyboardInterrupt:

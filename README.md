@@ -17,11 +17,15 @@ Raspberry Pi 3 (以下 RPi3) に BLE やボタンなどから何かしらの入�
 - D7 port に RGB LED を接続
 - D8 port に LED を接続 (ボタンを押した時のフィードバック用で普通の LED)
 
-AFN のチャンネルは...
+AFN のチャンネルは Encoder の...
 
-再生(Tokyo:青色)、停止、再生(Joe Radio:緑色)、停止、再生(Power Talk:シアン色)、停止、再生(The Voice:赤色)、停止、再生(Freedom:マジェンダ色)、停止、再生(Tokyo:青色)...
+- 0:Tokyo:青色
+- 1:Joe Radio:緑色
+- 2:Power Talk:シアン色
+- 3:The Voice:赤色
+- 4:Freedom:マジェンダ色
 
-となります。もしくは Encoder のつまみを回します。
+となります。
 
 [![the thing](images/IMG0047.png)](images/IMG0054.m4v)
 
