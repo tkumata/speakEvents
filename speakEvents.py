@@ -6,7 +6,6 @@ from ConfigParser import SafeConfigParser
 from distutils import spawn
 import datetime
 import locale
-#import json
 import subprocess, signal
 import time
 import os, sys
@@ -112,6 +111,9 @@ def afn360(channel, onoff):
     
     if onoff == 1:
         killMplayer()
+        
+        if channel > 4:
+            channel = 1
         
         # LED turn on
         grovepi.chainableRgbLed_test(rgbLED, numLEDs, channel+1)
@@ -350,6 +352,7 @@ if __name__ == '__main__':
                 if not os.path.exists(lockFileM):
                     if afn_on == 0:
                         [new_val, encoder_val] = grovepi.encoderRead()
+                        print('=====> encoder value %d') % encoder_val
                         afn_on = 1
                         afn360(encoder_val, afn_on)
                     else:
@@ -357,9 +360,9 @@ if __name__ == '__main__':
                         afn360(0, afn_on)
                 else:
                     print('=====> locking...')
-
+            
             time.sleep(.1)
-
+        
         except KeyboardInterrupt:
             grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
             grovepi.digitalWrite(feedLED, 0)
