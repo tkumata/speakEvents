@@ -12,7 +12,7 @@ Raspberry Pi 3 (以下 RPi3) に BLE やボタンなどから何かしらの入�
 
 今回はお気楽極楽に、入力として GrovePi+ を使うことにしました。GrovePi+ の
 
-- D2 port に Encoder
+- D2 port に Encoder を接続
 - D4 port にボタンを接続 (天気情報と iCloud Calendar を読み上げます。)
 - D5 port にボタンを接続 (AFN 360 を再生します。もし既に再生中だった場合、停止します。)
 - D7 port に Chainable RGB LED を接続
@@ -62,6 +62,7 @@ AFN のチャンネルは Encoder の...
 8. sudo cp speakEvents/speakEventsService.sh /etc/init.d/
 9. sudo update-rc.d speakEventsService.sh defaults
 10. sudo /etc/init.d/speakEventsService.sh start
+11. Push button!
 
 
 
@@ -100,6 +101,9 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 
 
 - Firmware patch for v1.2.6
+
+Encoder と Chainable RGB LED を同時に使うにはファームウェアにパッチ当てないといけません。パッチは私が作ったものでちゃんとした検証をしていませんのでご留意ください。「Encoder 使わないよ」と言う場合はファームウェアをいじらなくてもいいです。
+
 ```
 --- /home/pi/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/grove_pi_v1_2_6.ino   2016-04-23 20:35:48.636875637 +0900
 +++ src/grove_pi_v1_2_6.ino 2016-05-04 09:09:57.028214361 +0900
@@ -116,7 +120,9 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 
 
 - Compile firmware v1.2.6 and install
+
 ```
+$ sudo pip install ino
 $ mkdir firmware && cd firmware
 $ ino init
 $ rm src/sketch.ino
@@ -133,6 +139,7 @@ $ avrdude -c gpio -p m328p -U flash:w:firmware.hex
 - ロータリーかスライダーで AFN のチャンネルを選択できるようにしたい。
 - 折角の RPi3 なので BLE でコントロールできるようにしたい。
 - ニュースヘッドラインも追加したい。
+- AFN 以外のネットラジオも追加したい。
 
 
 ## 過去の版
