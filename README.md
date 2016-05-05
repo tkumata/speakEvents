@@ -101,17 +101,17 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 
 - Firmware patch for v1.2.6
 ```
-— src/grove_pi_v1_2_6.ino  2016-05-04 09:09:57.028214361 +0900
-+++ /home/pi/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/grove_pi_v1_2_6.ino   2016-04-23 20:35:48.636875637 +0900
-@@ -96,7 +96,7 @@
-void loop()
-{
-long dur,RangeCm;
-– if(index==4 && flag==0)
-+ if(index==4)
-{
-flag=1;
-//IR reciever pin set command
+--- /home/pi/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/grove_pi_v1_2_6.ino   2016-04-23 20:35:48.636875637 +0900
++++ src/grove_pi_v1_2_6.ino 2016-05-04 09:09:57.028214361 +0900
+@@ -96,7 +96,7 @@ int j;
+ void loop()
+ {
+   long dur,RangeCm;
+-  if(index==4)
++  if(index==4 && flag==0)
+   {
+     flag=1;
+     //IR reciever pin set command
 ```
 
 
@@ -121,6 +121,7 @@ $ mkdir firmware && cd firmware
 $ ino init
 $ rm src/sketch.ino
 $ cp -a ~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/* src/
+(in this step apply patch.)
 $ ino list-models
 $ ino build -m atmega328
 $ cd .build/atmega328
