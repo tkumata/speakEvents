@@ -27,7 +27,7 @@ AFN のチャンネルは Encoder の...
 | 2    | Power Talk | シアン色 |
 | 3    | The Voice  | 赤色 |
 | 4    | Freedom    | マジェンダ色 |
-| 5-24 | 未定       | 未定 |
+| 5-24 | Joe Radio  | 緑色 |
 
 となります。
 
@@ -36,11 +36,11 @@ AFN のチャンネルは Encoder の...
 
 ## 必要なハード
 1. Raspberry Pi 3
-2. GrovePi+ (!!! IMPORTANT !!! Firmware is v1.2.5 over and apply patch.)
+2. GrovePi+ (IMPORTANT!! Firmware is v1.2.5 over and apply following patch.)
 3. Two buttons for Grove (D4, D5)
 4. Chainable RGB LED (D7)
 5. LED (D8)
-6. Encoder (D2) (!!! IMPORTANT !!! Grove Encoder works on only D2 port.)
+6. Encoder (D2) (IMPORTANT!! Grove Encoder works on D2 port only.)
 
 
 ## 必要なソフト
@@ -62,11 +62,10 @@ AFN のチャンネルは Encoder の...
 8. sudo cp speakEvents/speakEventsService.sh /etc/init.d/
 9. sudo update-rc.d speakEventsService.sh defaults
 10. sudo /etc/init.d/speakEventsService.sh start
-11. Push button!
 
 
-
-- example atalk.sh
+## その他
+* example atalk.sh
 
 AquesTalkPi が作った wav データを再生する wrapper の例です。
 
@@ -85,7 +84,7 @@ fi
 ```
 
 
-- /home/pi/.speakevents format
+* /home/pi/.speakevents format
 
 pyicloud を使うための設定ファイルの形式です。天気情報は tenki.jp のみ対応しています。
 
@@ -100,9 +99,9 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 ```
 
 
-- Firmware patch for v1.2.6
+* Firmware patch for v1.2.6
 
-Encoder と Chainable RGB LED を同時に使うにはファームウェアにパッチ当てないといけません。パッチは私が作ったものでちゃんとした検証をしていませんのでご留意ください。「Encoder 使わないよ」と言う場合はファームウェアをいじらなくてもいいです。
+Encoder と Chainable RGB LED を同時に使うにはファームウェアにパッチ当てないといけません。パッチは私が作ったものでちゃんとした検証をしていませんのでご留意ください。「Encoder 使わないよ」と言う場合はファームウェアをいじらなくてもいいです。また、Encoder だけ使う場合はパッチを当てない v1.2.5 以上が必要です。
 
 ```
 --- /home/pi/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/grove_pi_v1_2_6.ino   2016-04-23 20:35:48.636875637 +0900
@@ -119,7 +118,7 @@ Encoder と Chainable RGB LED を同時に使うにはファームウェアに�
 ```
 
 
-- Compile firmware v1.2.6 and install
+* Compile firmware v1.2.6 and install
 
 ```
 $ sudo pip install ino

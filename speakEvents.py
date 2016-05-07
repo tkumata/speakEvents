@@ -17,34 +17,28 @@ import atexit
 # Global var
 homeDir = os.path.expanduser('~')
 configFile = homeDir + '/.speakevents'
-lockFile = '/tmp/speakEventsLockfile'
-lockFileM = '/tmp/speakEventsLockfileM'
+lockFileB1 = '/tmp/speakEventsLockfileB1'
+lockFileB2 = '/tmp/speakEventsLockfileB2'
 mplayerLog = '/tmp/speakEventsMpLogfile'
-weatherurl1 = 'http://www.tenki.jp/forecast/3/16/'                      # Weather info for 'Kanto Plain'
-weatherurl2 = 'http://www.tenki.jp/forecast/3/16/4410/13112-daily.html' # Pinpoint weather info for 'Setagaya-ku'
+weatherURL1 = 'http://www.tenki.jp/forecast/3/16/'                      # Weather info for 'Kanto Plain'
+weatherURL2 = 'http://www.tenki.jp/forecast/3/16/4410/13112-daily.html' # Pinpoint weather info for 'Setagaya-ku'
 userid = ''
 passwd = ''
-afn_on = 0
+radio_on = 0
 
 # Set GrovePi+ ports.
 encoder2 = 2    # encoder. if you use it, update firmware to patched v1.2.6. And Encoder work only D2 port.
 encoder3 = 3    # encoder. if you use it, update firmware to patched v1.2.6.
-icloudbtn = 4   # button iCloud
-afn360btn = 5   # button AFN
+icloudBtn = 4   # button iCloud
+afn360Btn = 5   # button AFN
 rgbLED = 7      # RGB LED. if you use it with Encoder, update firmware to patched v1.2.6
 feedLED = 8     # LED
 numLEDs = 1     # Num of chain LED
 
-grovepi.pinMode(icloudbtn, 'INPUT')
-grovepi.pinMode(afn360btn, 'INPUT')
+grovepi.pinMode(icloudBtn, 'INPUT')
+grovepi.pinMode(afn360Btn, 'INPUT')
 grovepi.pinMode(rgbLED, 'OUTPUT')
 grovepi.pinMode(feedLED, 'OUTPUT')
-
-# Init LED off
-grovepi.digitalWrite(feedLED, 0)
-
-# Init chain of leds
-grovepi.chainableRgbLed_init(rgbLED, numLEDs)
 
 # test colors used in grovepi.chainableRgbLed_test()
 testColorBlack = 0   # 0b000 #000000
@@ -62,10 +56,6 @@ allLedsExceptThis = 1
 thisLedAndInwards = 2
 thisLedAndOutwards = 3
 
-# Init Grove Encoder
-atexit.register(grovepi.encoder_dis)
-grovepi.encoder_en()
-
 # Check text speaker
 if platform.system() == 'Linux':
     if spawn.find_executable('/home/pi/bin/atalk.sh'):
@@ -79,9 +69,11 @@ elif platform.system() == 'Darwin':
     else:
         print('=====> say がありません。')
         quit()
+else:
+    quit()
 
-# AFN channels
-AFNchannels = ['http://14023.live.streamtheworld.com/AFNP_TKO',
+# Internet Radio channels
+radioChannels = ['http://14023.live.streamtheworld.com/AFNP_TKO',
                'http://14093.live.streamtheworld.com/AFN_JOE',
                'http://4533.live.streamtheworld.com/AFN_PTK',
                'http://6073.live.streamtheworld.com/AFN_VCE',
@@ -101,38 +93,37 @@ def killMplayer():
     if os.path.exists(mplayerLog):
         os.remove(mplayerLog)
     
+    # Turn Chainable RGB LED off
     grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
 
 # AFN360 procedure, play and stop
-def afn360(channel, onoff):
+def afn360(channel, doPlay):
     # create lock file
-    f = open(lockFileM, 'w')
+    f = open(lockFileB2, 'w')
     f.close()
     
-    if onoff == 1:
+    if doPlay == 1:
         killMplayer()
         
         if channel > 4:
             channel = 1
         
-        # LED turn on
+        # Turn Chainable RGB LED on
         grovepi.chainableRgbLed_test(rgbLED, numLEDs, channel+1)
         
         # If not found mplayer, run mplayer.
-        print('=====> start AFN channel: %s.') % AFNchannels[channel]
-        cmd = 'nohup mplayer ' + AFNchannels[channel]
+        print('=====> start AFN channel: %s.') % radioChannels[channel]
+        cmd = 'nohup mplayer ' + radioChannels[channel]
         subprocess.Popen(cmd.split(), stdout=open('/dev/null', 'w'), stderr=open(mplayerLog, 'a'), preexec_fn=os.setpgrp)
+    
     else:
         killMplayer()
     
     # Remove lock file.
-    os.remove(lockFileM)
-    
-    # feedback LED turn off
+    os.remove(lockFileB2)
+    # Turn feedback LED off
     grovepi.digitalWrite(feedLED, 0)
 
-
-#
 # check config file and get iCloud API.
 #
 # touch ~/.pyicloud && chmod 600 ~/.pyicloud && vi ~/.pyicloud
@@ -142,9 +133,8 @@ def afn360(channel, onoff):
 #[weatherurls]
 #weather1 = http://www.tenki.jp/forecast/3/16/
 #weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
-#
 def get_config():
-    global weatherurl1, weatherurl2, userid, passwd
+    global weatherURL1, weatherURL2, userid, passwd
     
     if os.path.isfile(configFile):
         parser = SafeConfigParser()
@@ -158,13 +148,13 @@ def get_config():
         
         w1 = parser.get('weatherurls', 'weather1')
         if not w1 == '':
-            weatherurl1 = w1
-            assert isinstance(weatherurl1, str)
+            weatherURL1 = w1
+            assert isinstance(weatherURL1, str)
         
         w2 = parser.get('weatherurls', 'weather2')
         if not w2 == '':
-            weatherurl2 = w2
-            assert isinstance(weatherurl2, str)
+            weatherURL2 = w2
+            assert isinstance(weatherURL2, str)
     else:
         print u'=====> config file not found.'
         quit()
@@ -178,7 +168,6 @@ def get_iccdata():
         from_dt = datetime.datetime(d.year, d.month, d.day)
         to_dt = datetime.datetime(d.year, d.month, d.day)
         iccEvents = api.calendar.events(from_dt, to_dt)
-        
         return iccEvents
     else:
         print('=====> api is null.')
@@ -193,7 +182,6 @@ def get_weatherinfo1(url):
     html = req.text
     strPattern = r'<h2 class="sub_title">(.*)</p>'
     matches = re.finditer(strPattern, html)
-    
     for match in matches:
         w = htmlTagPattern.sub('', match.groups()[0])
     
@@ -218,8 +206,8 @@ def get_weatherinfo2(url):
     for match in matches:
         tempN = htmlTagPattern.sub('', match.groups()[0])
         info.append(tempN + u'度')
-    # In this step info[] has began following,
-    # [気温, N度, N度]
+        # In this step info[] has began following,
+        # [気温, N度, N度]
     
     # Get chance of rain.
     rainPattern = ur'<td>(.*)</td>'
@@ -230,8 +218,8 @@ def get_weatherinfo2(url):
         if rainN == '---':
             rainN = u'なし'
         info.append(rainN)
-    # In this step info[] has began following,
-    # [気温, N度, N度, 降水確率, N%, N%, N%, N%]
+        # In this step info[] has began following,
+        # [気温, N度, N度, 降水確率, N%, N%, N%, N%]
     
     if len(info) == 8:
         info.insert(1, u'最高気温')
@@ -248,33 +236,27 @@ def get_weatherinfo2(url):
 # speak events.
 def speakEvents():
     # create lock file
-    f = open(lockFile, 'w')
+    f = open(lockFileB1, 'w')
     f.close()
     
     # Get config
     get_config()
     
     # Speak Weather 1
-    weatherinfo1 = get_weatherinfo1(weatherurl1)
+    weatherinfo1 = get_weatherinfo1(weatherURL1)
     if not len(weatherinfo1) == 0:
         cmd = speaker + ' 130 "' + weatherinfo1 + '"'
         subprocess.call(cmd.split(), shell=False)
         time.sleep(1)
     
     # Speak Weather 2
-    weatherinfo2 = get_weatherinfo2(weatherurl2)
+    weatherinfo2 = get_weatherinfo2(weatherURL2)
     if not len(weatherinfo2) == 0:
         for info in weatherinfo2:
             cmd = speaker + ' 100 "' + info + '"'
             subprocess.call(cmd.split(), shell=False)
-        
         time.sleep(1)
     
-    # blink LED
-    grovepi.digitalWrite(feedLED, 0)
-    time.sleep(.3)
-    grovepi.digitalWrite(feedLED, 1)
-
     # Speak Events
     events = get_iccdata()
     if len(events) == 0:
@@ -316,50 +298,68 @@ def speakEvents():
         endTalk = u'忘れ物はありませんか。以上'
         cmd = speaker + ' 100 "' + endTalk + '"'
         subprocess.call(cmd.split(), shell=False)
-    # End if
     
     # Remove lock file.
-    os.remove(lockFile)
+    os.remove(lockFileB1)
     
-    # feedback LED turn off
+    # Turn feedback LED off
     grovepi.digitalWrite(feedLED, 0)
 
 # main
 if __name__ == '__main__':
+    # Init LED
+    grovepi.digitalWrite(feedLED, 0)
+    
+    # Init Chainable RGB LED
+    grovepi.chainableRgbLed_init(rgbLED, numLEDs)
+    
+    # Init Grove Encoder
+    atexit.register(grovepi.encoder_dis)
+    grovepi.encoder_en()
+    
+    # Init mplayer
+    killMplayer()
+    
     while True:
         try:
-            if afn_on == 1:
+            if radio_on == 1:
                 [new_val, encoder_val] = grovepi.encoderRead()
                 if new_val:
-                    print('=====> encoder value %d') % encoder_val
-                    if not os.path.exists(lockFileM):
-                        afn360(encoder_val, afn_on)
+                    print('=====> Encoder: %d') % encoder_val
+                    
+                    if not os.path.exists(lockFileB2):
+                        afn360(encoder_val, radio_on)
             
-            if grovepi.digitalRead(icloudbtn) == 1:
-                print('=====> push D%d') % icloudbtn
-                # feedback LED turn on
+            if grovepi.digitalRead(icloudBtn) == 1:
+                print('=====> Button: D%d') % icloudBtn
+                
+                # Turn feedback LED on
                 grovepi.digitalWrite(feedLED, 1)
-                # speakEvents
-                if not os.path.exists(lockFile):
+                
+                # Run speakEvents
+                if not os.path.exists(lockFileB1):
                     speakEvents()
                 else:
-                    print('=====> locking...')
+                    print('=====> Locking...')
             
-            if grovepi.digitalRead(afn360btn) == 1:
-                print('=====> push D%d') % afn360btn
-                # feedback LED turn on
+            if grovepi.digitalRead(afn360Btn) == 1:
+                print('=====> Button: D%d') % afn360Btn
+                
+                # Turn feedback LED on
                 grovepi.digitalWrite(feedLED, 1)
-                if not os.path.exists(lockFileM):
-                    if afn_on == 0:
+                
+                # Run internet radio
+                if not os.path.exists(lockFileB2):
+                    if radio_on == 0:
                         [new_val, encoder_val] = grovepi.encoderRead()
-                        print('=====> encoder value %d') % encoder_val
-                        afn_on = 1
-                        afn360(encoder_val, afn_on)
+                        print('=====> Encoder: %d') % encoder_val
+                        radio_on = 1
+                        afn360(encoder_val, radio_on)
                     else:
-                        afn_on = 0
-                        afn360(0, afn_on)
+                        radio_on = 0
+                        afn360(0, radio_on)
                 else:
-                    print('=====> locking...')
+                    print('=====> Locking...')
             
             time.sleep(.1)
         
