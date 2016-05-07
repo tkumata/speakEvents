@@ -326,7 +326,6 @@ if __name__ == '__main__':
                 [new_val, encoder_val] = grovepi.encoderRead()
                 if new_val:
                     print('=====> Encoder: %d') % encoder_val
-                    
                     if not os.path.exists(lockFileB2):
                         afn360(encoder_val, radio_on)
             

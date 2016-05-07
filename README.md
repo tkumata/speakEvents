@@ -20,14 +20,14 @@ Raspberry Pi 3 (以下 RPi3) に BLE やボタンなどから何かしらの入�
 
 AFN のチャンネルは Encoder の...
 
-| Step | Channnel   | Color        |
-|------|:----------:|:-------------|
-| 0    | Tokyo      | 青色 |
-| 1    | Joe Radio  | 緑色 |
-| 2    | Power Talk | シアン色 |
-| 3    | The Voice  | 赤色 |
-| 4    | Freedom    | マジェンダ色 |
-| 5-24 | Joe Radio  | 緑色 |
+| Step | Channnel   | Color        | Timer    |
+|------|:----------:|:------------:|:---------|
+| 0    | Tokyo      | 青色         | None     |
+| 1    | Joe Radio  | 緑色         | None     |
+| 2    | Power Talk | シアン色     | None     |
+| 3    | The Voice  | 赤色         | None     |
+| 4    | Freedom    | マジェンダ色 | None     |
+| 5-24 | Joe Radio  | 緑色         | one hour |
 
 となります。
 
