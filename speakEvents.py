@@ -30,13 +30,13 @@ radio_on = 0
 encoder2 = 2    # encoder. if you use it, update firmware to patched v1.2.6. And Encoder work only D2 port.
 encoder3 = 3    # encoder. if you use it, update firmware to patched v1.2.6.
 icloudBtn = 4   # button iCloud
-afn360Btn = 5   # button AFN
+radioBtn = 5   # button AFN
 rgbLED = 7      # RGB LED. if you use it with Encoder, update firmware to patched v1.2.6
 feedLED = 8     # LED
 numLEDs = 1     # Num of chain LED
 
 grovepi.pinMode(icloudBtn, 'INPUT')
-grovepi.pinMode(afn360Btn, 'INPUT')
+grovepi.pinMode(radioBtn, 'INPUT')
 grovepi.pinMode(rgbLED, 'OUTPUT')
 grovepi.pinMode(feedLED, 'OUTPUT')
 
@@ -97,7 +97,7 @@ def killMplayer():
     grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
 
 # AFN360 procedure, play and stop
-def afn360(channel, doPlay):
+def radio(channel, doPlay):
     # create lock file
     f = open(lockFileB2, 'w')
     f.close()
@@ -327,7 +327,7 @@ if __name__ == '__main__':
                 if new_val:
                     print('=====> Encoder: %d') % encoder_val
                     if not os.path.exists(lockFileB2):
-                        afn360(encoder_val, radio_on)
+                        radio(encoder_val, radio_on)
             
             if grovepi.digitalRead(icloudBtn) == 1:
                 print('=====> Button: D%d') % icloudBtn
@@ -341,8 +341,8 @@ if __name__ == '__main__':
                 else:
                     print('=====> Locking...')
             
-            if grovepi.digitalRead(afn360Btn) == 1:
-                print('=====> Button: D%d') % afn360Btn
+            if grovepi.digitalRead(radioBtn) == 1:
+                print('=====> Button: D%d') % radioBtn
                 
                 # Turn feedback LED on
                 grovepi.digitalWrite(feedLED, 1)
@@ -353,10 +353,10 @@ if __name__ == '__main__':
                         [new_val, encoder_val] = grovepi.encoderRead()
                         print('=====> Encoder: %d') % encoder_val
                         radio_on = 1
-                        afn360(encoder_val, radio_on)
+                        radio(encoder_val, radio_on)
                     else:
                         radio_on = 0
-                        afn360(0, radio_on)
+                        radio(0, radio_on)
                 else:
                     print('=====> Locking...')
             
