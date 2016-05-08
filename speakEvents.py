@@ -18,11 +18,11 @@ import threading
 import atexit
 
 # Global var
-homeDir = os.path.expanduser('~')
-configFile = homeDir + '/.speakevents'
-lockFileB1 = '/tmp/speakEventsLockfileB1'
-lockFileB2 = '/tmp/speakEventsLockfileB2'
-mplayerLog = '/tmp/speakEventsMpLogfile'
+home_dir = os.path.expanduser('~')
+config_file = home_dir + '/.speakevents'
+LockFileB1 = '/tmp/speakEventsLockfileB1'
+LockFileB2 = '/tmp/speakEventsLockfileB2'
+MplayerLog = '/tmp/speakEventsMpLogfile'
 weatherURL1 = 'http://www.tenki.jp/forecast/3/16/' # Weather info for 'Kanto Plain'
 weatherURL2 = 'http://www.tenki.jp/forecast/3/16/4410/13112-daily.html' # Pinpoint weather info for 'Setagaya-ku'
 userid = ''
@@ -122,19 +122,19 @@ def killMplayer():
             pid = int(line.split(None, 1)[0])
             os.kill(pid, signal.SIGKILL)
     
-    if os.path.exists(mplayerLog):
-        os.remove(mplayerLog)
+    if os.path.exists(MplayerLog):
+        os.remove(MplayerLog)
     
     # Turn Chainable RGB LED off
     grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
 
 
 # AFN360 procedure, play and stop
-def radio(channel, doPlay):
+def startRadio(channel, doPlay):
     global t
     
     # create lock file
-    f = open(lockFileB2, 'w')
+    f = open(LockFileB2, 'w')
     f.close()
     
     if doPlay == 1:
@@ -155,14 +155,14 @@ def radio(channel, doPlay):
         subprocess.Popen(
             cmd.split(),
             stdout=open('/dev/null', 'w'),
-            stderr=open(mplayerLog, 'a'),
+            stderr=open(MplayerLog, 'a'),
             preexec_fn=os.setpgrp)
     
     else:
         killMplayer()
     
     # Remove lock file.
-    os.remove(lockFileB2)
+    os.remove(LockFileB2)
     
     # Turn feedback LED off
     grovepi.digitalWrite(feedLED, 0)
@@ -180,9 +180,9 @@ def radio(channel, doPlay):
 def get_config():
     global weatherURL1, weatherURL2, userid, passwd
     
-    if os.path.isfile(configFile):
+    if os.path.isfile(config_file):
         parser = SafeConfigParser()
-        parser.read(configFile)
+        parser.read(config_file)
         
         userid = parser.get('account', 'user')
         assert isinstance(userid, str)
@@ -284,7 +284,7 @@ def get_weatherinfo2(url):
 # speak events.
 def speakEvents():
     # create lock file
-    f = open(lockFileB1, 'w')
+    f = open(LockFileB1, 'w')
     f.close()
     
     # Get config
@@ -348,7 +348,7 @@ def speakEvents():
         subprocess.call(cmd.split(), shell=False)
     
     # Remove lock file.
-    os.remove(lockFileB1)
+    os.remove(LockFileB1)
     
     # Turn feedback LED off
     grovepi.digitalWrite(feedLED, 0)
@@ -378,8 +378,8 @@ if __name__ == '__main__':
                 [new_val, encoder_val] = grovepi.encoderRead()
                 if new_val:
                     print('=====> Encoder: %d') % encoder_val
-                    if not os.path.exists(lockFileB2):
-                        radio(encoder_val, radio_on)
+                    if not os.path.exists(LockFileB2):
+                        startRadio(encoder_val, radio_on)
             
             if grovepi.digitalRead(icloudBtn) == 1:
                 print('=====> Button: D%d') % icloudBtn
@@ -388,7 +388,7 @@ if __name__ == '__main__':
                 grovepi.digitalWrite(feedLED, 1)
                 
                 # Run speakEvents
-                if not os.path.exists(lockFileB1):
+                if not os.path.exists(LockFileB1):
                     speakEvents()
                 else:
                     print('=====> Locking...')
@@ -403,17 +403,17 @@ if __name__ == '__main__':
                 radio_on = detectMplayer()
                 
                 # Run internet radio
-                if not os.path.exists(lockFileB2):
+                if not os.path.exists(LockFileB2):
                     if radio_on == 0:
                         [new_val, encoder_val] = grovepi.encoderRead()
                         print('=====> Encoder: %d') % encoder_val
                         radio_on = 1
                         sleep = 0.5
-                        radio(encoder_val, radio_on)
+                        startRadio(encoder_val, radio_on)
                     else:
                         radio_on = 0
                         sleep = 0.1
-                        radio(0, radio_on)
+                        startRadio(0, radio_on)
                 else:
                     print('=====> Locking...')
             
