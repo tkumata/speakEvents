@@ -8,10 +8,13 @@ import datetime
 import locale
 import subprocess, signal
 import time
-import os, sys
+import os
+import sys
 import platform
-import requests, re
+import requests
+import re
 import shlex
+import threading
 import atexit
 
 # Global var
@@ -20,17 +23,19 @@ configFile = homeDir + '/.speakevents'
 lockFileB1 = '/tmp/speakEventsLockfileB1'
 lockFileB2 = '/tmp/speakEventsLockfileB2'
 mplayerLog = '/tmp/speakEventsMpLogfile'
-weatherURL1 = 'http://www.tenki.jp/forecast/3/16/'                      # Weather info for 'Kanto Plain'
+weatherURL1 = 'http://www.tenki.jp/forecast/3/16/' # Weather info for 'Kanto Plain'
 weatherURL2 = 'http://www.tenki.jp/forecast/3/16/4410/13112-daily.html' # Pinpoint weather info for 'Setagaya-ku'
 userid = ''
 passwd = ''
 radio_on = 0
+sleep = 0.1
+p = 0
 
 # Set GrovePi+ ports.
 encoder2 = 2    # encoder. if you use it, update firmware to patched v1.2.6. And Encoder work only D2 port.
 encoder3 = 3    # encoder. if you use it, update firmware to patched v1.2.6.
 icloudBtn = 4   # button iCloud
-radioBtn = 5   # button AFN
+radioBtn = 5    # button AFN
 rgbLED = 7      # RGB LED. if you use it with Encoder, update firmware to patched v1.2.6
 feedLED = 8     # LED
 numLEDs = 1     # Num of chain LED
@@ -73,16 +78,43 @@ else:
     quit()
 
 # Internet Radio channels
-radioChannels = ['http://14023.live.streamtheworld.com/AFNP_TKO',
-               'http://14093.live.streamtheworld.com/AFN_JOE',
-               'http://4533.live.streamtheworld.com/AFN_PTK',
-               'http://6073.live.streamtheworld.com/AFN_VCE',
-               'http://14963.live.streamtheworld.com/AFN_FRE'
-]
+radioChannels = [
+    'http://14023.live.streamtheworld.com/AFNP_TKO',
+    'http://14093.live.streamtheworld.com/AFN_JOE',
+    'http://4533.live.streamtheworld.com/AFN_PTK',
+    'http://6073.live.streamtheworld.com/AFN_VCE',
+    'http://14963.live.streamtheworld.com/AFN_FRE',
+    ]
+
+
+# Detect mplayer
+def detectMplayer():
+    global p
+    
+    psCmd = subprocess.Popen(
+                ['ps', 'ax'],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                close_fds=True, shell=False)
+    out = psCmd.communicate()[0]
+    
+    for line in out.splitlines():
+        if 'mplayer' in line and 'AFN' in line:
+            p = int(line.split(None, 1)[0])
+            
+    if p > 0:
+        return 1
+    else:
+        return 0
+
 
 # Kill mplayer
 def killMplayer():
-    psCmd = subprocess.Popen(['ps', 'ax'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True, shell=False)
+    psCmd = subprocess.Popen(
+                ['ps', 'ax'],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                close_fds=True, shell=False)
     out = psCmd.communicate()[0]
     
     for line in out.splitlines():
@@ -96,8 +128,11 @@ def killMplayer():
     # Turn Chainable RGB LED off
     grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
 
+
 # AFN360 procedure, play and stop
 def radio(channel, doPlay):
+#    global t
+    
     # create lock file
     f = open(lockFileB2, 'w')
     f.close()
@@ -107,6 +142,9 @@ def radio(channel, doPlay):
         
         if channel > 4:
             channel = 1
+            t.start()
+        else:
+            t.cancel()
         
         # Turn Chainable RGB LED on
         grovepi.chainableRgbLed_test(rgbLED, numLEDs, channel+1)
@@ -114,15 +152,21 @@ def radio(channel, doPlay):
         # If not found mplayer, run mplayer.
         print('=====> start AFN channel: %s.') % radioChannels[channel]
         cmd = 'nohup mplayer ' + radioChannels[channel]
-        subprocess.Popen(cmd.split(), stdout=open('/dev/null', 'w'), stderr=open(mplayerLog, 'a'), preexec_fn=os.setpgrp)
+        subprocess.Popen(
+            cmd.split(),
+            stdout=open('/dev/null', 'w'),
+            stderr=open(mplayerLog, 'a'),
+            preexec_fn=os.setpgrp)
     
     else:
         killMplayer()
     
     # Remove lock file.
     os.remove(lockFileB2)
+    
     # Turn feedback LED off
     grovepi.digitalWrite(feedLED, 0)
+
 
 # check config file and get iCloud API.
 #
@@ -159,6 +203,7 @@ def get_config():
         print u'=====> config file not found.'
         quit()
 
+
 # get iCloud Calendar data.
 def get_iccdata():
     api = PyiCloudService(userid, passwd)
@@ -173,9 +218,10 @@ def get_iccdata():
         print('=====> api is null.')
         quit()
 
+
 # Get Weather Info 1
 def get_weatherinfo1(url):
-    htmlTagPattern = re.compile(r'<[^>]*?>')            # remove html tag pattern
+    htmlTagPattern = re.compile(r'<[^>]*?>') # remove html tag pattern
 
     # Get HTML strings
     req = requests.get(url)
@@ -187,10 +233,11 @@ def get_weatherinfo1(url):
     
     return w
 
+
 # Get Weather Info 2
 def get_weatherinfo2(url):
     info = []
-    htmlTagPattern = re.compile(r'<[^>]*?>')                # remove html tag pattern
+    htmlTagPattern = re.compile(r'<[^>]*?>') # remove html tag pattern
     
     # Get HTML strings of today's weather
     req = requests.get(url)
@@ -233,6 +280,7 @@ def get_weatherinfo2(url):
     
     return info
 
+
 # speak events.
 def speakEvents():
     # create lock file
@@ -265,7 +313,7 @@ def speakEvents():
         cmd = speaker + ' 120 "' + talk + '"'
         subprocess.call(cmd.split(), shell=False)
     else:
-        events2 = sorted(events, key=lambda x:x['startDate'])    # sort by startDate
+        events2 = sorted(events, key=lambda x:x['startDate']) # sort by startDate
         
         # 一日分のループ
         for event in events2:
@@ -305,6 +353,7 @@ def speakEvents():
     # Turn feedback LED off
     grovepi.digitalWrite(feedLED, 0)
 
+
 # main
 if __name__ == '__main__':
     # Init LED
@@ -316,6 +365,9 @@ if __name__ == '__main__':
     # Init Grove Encoder
     atexit.register(grovepi.encoder_dis)
     grovepi.encoder_en()
+    
+    # Create threading object
+    t = threading.Timer(3600, killMplayer)
     
     # Init mplayer
     killMplayer()
@@ -347,25 +399,36 @@ if __name__ == '__main__':
                 # Turn feedback LED on
                 grovepi.digitalWrite(feedLED, 1)
                 
+                # Detect mplayer
+                radio_on = detectMplayer()
+                
                 # Run internet radio
                 if not os.path.exists(lockFileB2):
                     if radio_on == 0:
                         [new_val, encoder_val] = grovepi.encoderRead()
                         print('=====> Encoder: %d') % encoder_val
                         radio_on = 1
+                        sleep = 0.5
                         radio(encoder_val, radio_on)
                     else:
                         radio_on = 0
+                        sleep = 0.1
                         radio(0, radio_on)
                 else:
                     print('=====> Locking...')
             
-            time.sleep(.1)
+            time.sleep(sleep)
         
         except KeyboardInterrupt:
+            print('=====> ctrl + c')
             grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
             grovepi.digitalWrite(feedLED, 0)
+            t.cancel()
             break
-
+        
         except IOError:
             print('=====> IO Error.')
+        
+#        finally:
+#            grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
+#            grovepi.digitalWrite(feedLED, 0)
