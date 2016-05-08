@@ -12,11 +12,13 @@ Raspberry Pi 3 (以下 RPi3) に BLE やボタンなどから何かしらの入�
 
 今回はお気楽極楽に、入力として GrovePi+ を使うことにしました。GrovePi+ の
 
-- D2 port に Encoder を接続
-- D4 port にボタンを接続 (天気情報と iCloud Calendar を読み上げます。)
-- D5 port にボタンを接続 (AFN 360 を再生します。もし既に再生中だった場合、停止します。)
-- D7 port に Chainable RGB LED を接続
-- D8 port に LED を接続 (ボタンを押した時のフィードバック用で普通の LED)
+| Port | Device            | Role                                   | Notes   |
+|------|:-----------------:|:--------------------------------------:|:--------|
+| D2   | Encoder           | インターネットラジオのチャンネルの変更 | D2 only | 
+| D4   | Button            | 天気情報と iCloud Calendar を読み上げ  ||
+| D5   | Button            | インターネットラジオの再生、停止       ||
+| D7   | Chainable RGB LED | チャンネルの表現                       ||
+| D8   | Normal LED        | ボタンを押した時のフィードバック用     ||
 
 AFN のチャンネルは Encoder の...
 

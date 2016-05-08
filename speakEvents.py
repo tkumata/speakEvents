@@ -131,7 +131,7 @@ def killMplayer():
 
 # AFN360 procedure, play and stop
 def radio(channel, doPlay):
-#    global t
+    global t
     
     # create lock file
     f = open(lockFileB2, 'w')
