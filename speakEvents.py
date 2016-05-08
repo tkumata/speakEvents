@@ -29,7 +29,6 @@ userid = ''
 passwd = ''
 radio_on = 0
 sleep = 0.1
-p = 0
 
 # Set GrovePi+ ports.
 encoder2 = 2    # encoder. if you use it, update firmware to patched v1.2.6. And Encoder work only D2 port.
@@ -89,8 +88,8 @@ radioChannels = [
 
 # Detect mplayer
 def detectMplayer():
-    global p
-    
+    p = 0
+     
     psCmd = subprocess.Popen(
                 ['ps', 'ax'],
                 stdin=subprocess.PIPE,
@@ -101,7 +100,7 @@ def detectMplayer():
     for line in out.splitlines():
         if 'mplayer' in line and 'AFN' in line:
             p = int(line.split(None, 1)[0])
-            
+    
     if p > 0:
         return 1
     else:
@@ -401,6 +400,7 @@ if __name__ == '__main__':
                 
                 # Detect mplayer
                 radio_on = detectMplayer()
+                print('=====> radio_on: %d') % radio_on
                 
                 # Run internet radio
                 if not os.path.exists(LockFileB2):
