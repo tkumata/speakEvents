@@ -29,7 +29,7 @@ AFN のチャンネルは Encoder の...
 | 2    | Power Talk | シアン色     | None     |
 | 3    | The Voice  | 赤色         | None     |
 | 4    | Freedom    | マジェンダ色 | None     |
-| 5-24 | Joe Radio  | 緑色         | one hour |
+| 5-24 | Joe Radio  | 緑色         | ~~~one hour~~~ |
 
 となります。
 
