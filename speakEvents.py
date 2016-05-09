@@ -23,21 +23,30 @@ config_file = home_dir + '/.speakevents'
 LockFileB1 = '/tmp/speakEventsLockfileB1'
 LockFileB2 = '/tmp/speakEventsLockfileB2'
 MplayerLog = '/tmp/speakEventsMpLogfile'
-WeatherURL1 = 'http://www.tenki.jp/forecast/3/16/' # Weather info for 'Kanto Plain'
-WeatherURL2 = 'http://www.tenki.jp/forecast/3/16/4410/13112-daily.html' # Pinpoint weather info for 'Setagaya-ku'
+# Weather info for 'Kanto Plain'
+WeatherURL1 = 'http://www.tenki.jp/forecast/3/16/'
+# Pinpoint weather info for 'Setagaya-ku'
+WeatherURL2 = 'http://www.tenki.jp/forecast/3/16/4410/13112-daily.html'
 userid = ''
 passwd = ''
 radio_on = 0
 sleep = 0.1
 
 # Set GrovePi+ ports.
-encoderRtr2 = 2 # encoder. if you use it, update firmware to patched v1.2.6. And Encoder work only D2 port.
-encoderRtr3 = 3 # encoder. if you use it, update firmware to patched v1.2.6.
-icloudBtn = 4   # button for iCloud
-radioBtn = 5    # button for radio
-rgbLED = 7      # chainable RGB LED. if you use it with Encoder, update firmware to patched v1.2.6
-feedbackLED = 8 # normal LED
-numLEDs = 1     # number of chained LED
+# encoder. if you use it, update firmware to patched v1.2.6. And Encoder work only D2 port.
+encoderRtr2 = 2
+encoderRtr3 = 3
+# button for iCloud
+icloudBtn = 4
+# button for radio
+radioBtn = 5
+# chainable RGB LED
+# if you use this with Encoder, update firmware and apply patch
+rgbLED = 7
+# normal LED
+feedbackLED = 8
+# number of chained LED
+numLEDs = 1
 
 grovepi.pinMode(icloudBtn, 'INPUT')
 grovepi.pinMode(radioBtn, 'INPUT')
@@ -289,6 +298,42 @@ def get_weatherinfo2(url):
     return info
 
 
+#
+def loopDay(e):
+    # 一日分のループ
+    for event in e:
+        # 個別イベントのループ
+        for key,value in event.items():
+            if key == 'startDate':
+                hour = value[4]
+                min = value[5]
+                if hour == 0 and min == 0:
+                    eventTime = u'終日'
+                else:
+                    eventTime = str(hour) + u'時' + str(min) + u'分から'
+                # print eventTime
+                cmd = speaker + ' 130 "' + eventTime + '"'
+                subprocess.call(cmd.split(), shell=False)
+            
+            if key == 'endDate':
+                hour = value[4]
+                min = value[5]
+                if hour == 0 and min == 0:
+                    eventEndTime = u'、'
+                else:
+                    eventEndTime = str(hour) + u'時' + str(min) + u'分まで'
+                # print eventEndTime
+                cmd = speaker + ' 130 "' + eventEndTime + '"'
+                subprocess.call(cmd.split(), shell=False)
+            
+            if key == 'title':
+                eventTitle = value + u'の予定があります。'
+                # print eventTitle
+                cmd = speaker + ' 100 "' + eventTitle + '"'
+                subprocess.call(cmd.split(), shell=False)
+                time.sleep(1)
+
+
 # speak events.
 def speakEvents():
     # create lock file
@@ -321,36 +366,8 @@ def speakEvents():
         cmd = speaker + ' 120 "' + talk + '"'
         subprocess.call(cmd.split(), shell=False)
     else:
-        events2 = sorted(events, key=lambda x:x['startDate']) # sort by startDate
-        
-        # 一日分のループ
-        for event in events2:
-            # 個別イベントのループ
-            for key,value in event.items():
-                if key == 'startDate':
-                    if value[4] == 0 and value[5] == 0:
-                        eventTime = u'終日'
-                    else:
-                        eventTime = str(value[4]) + u'時' + str(value[5]) + u'分から'
-                    #print eventTime,
-                    cmd = speaker + ' 130 "' + eventTime + '"'
-                    subprocess.call(cmd.split(), shell=False)
-                if key == 'endDate':
-                    if value[4] == 0 and value[5] == 0:
-                        eventEndTime = u'、'
-                    else:
-                        eventEndTime = str(value[4]) + u'時' + str(value[5]) + u'分まで'
-                    #print eventEndTime,
-                    cmd = speaker + ' 130 "' + eventEndTime + '"'
-                    subprocess.call(cmd.split(), shell=False)
-                if key == 'title':
-                    eventTitle = value + u'の予定があります。'
-                    #print eventTitle
-                    cmd = speaker + ' 100 "' + eventTitle + '"'
-                    subprocess.call(cmd.split(), shell=False)
-                    time.sleep(1)
-        
-        # 一日分のループが終了したら
+        events2 = sorted(events, key=lambda x:x['startDate']) # sort startDate
+        loopDay(events2)
         endTalk = u'忘れ物はありませんか。以上'
         cmd = speaker + ' 100 "' + endTalk + '"'
         subprocess.call(cmd.split(), shell=False)
@@ -436,6 +453,6 @@ if __name__ == '__main__':
             grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
             grovepi.digitalWrite(feedbackLED, 0)
 #            t.cancel()
-            break
+            quit()
         except IOError:
             print('====> IO Error.')
