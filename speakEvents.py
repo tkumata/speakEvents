@@ -87,6 +87,7 @@ else:
 
 # Internet Radio channels
 radioChannels = [
+    'rtmp://fms-base1.mitene.ad.jp/agqr/aandg22',
     'http://14023.live.streamtheworld.com/AFNP_TKO',
     'http://14093.live.streamtheworld.com/AFN_JOE',
     'http://4533.live.streamtheworld.com/AFN_PTK',
@@ -108,7 +109,8 @@ def detectMplayer():
     out = psCmd.communicate()[0]
     
     for line in out.splitlines():
-        if 'mplayer' in line and 'AFN' in line:
+        if ('mplayer' in line and 'AFN' in line) \
+                or ('mplayer -' in line) or ('rtmpdump' in line):
             p = int(line.split(None, 1)[0])
     
     if p > 0:
@@ -128,7 +130,8 @@ def killMplayer():
     out = psCmd.communicate()[0]
     
     for line in out.splitlines():
-        if 'mplayer' in line and 'AFN' in line:
+        if ('mplayer' in line and 'AFN' in line) \
+                or ('mplayer -' in line) or ('rtmpdump' in line):
             pid = int(line.split(None, 1)[0])
             os.kill(pid, signal.SIGKILL)
     
@@ -161,12 +164,35 @@ def startRadio(channel, doPlay):
         
         # If not found mplayer, run mplayer.
         print('====> start AFN channel: %s.') % radioChannels[channel]
-        cmd = 'nohup mplayer ' + radioChannels[channel]
-        subprocess.Popen(
-            cmd.split(),
-            stdout=open('/dev/null', 'w'),
-            stderr=open(MplayerLog, 'a'),
-            preexec_fn=os.setpgrp)
+        if channel == 0:
+            #cmd1 = "rtmpdump --live -r %s" % radioChannels[channel]
+            #cmd2 = "mplayer -"
+            #p1 = subprocess.Popen(cmd1.split(),
+            #        stdout=subprocess.PIPE)
+            #p2 = subprocess.Popen(cmd2.split(),
+            #        stdout=open('/dev/null', 'w'),
+            #        stderr=open(MplayerLog, 'a'),
+            #        stdin=p1.stdout,
+            #        preexec_fn=os.setpgrp)
+            #p1.stdout.close()
+            #output = p2.communicate()[0]
+            
+            # Bad script.
+            cmd = "nohup sh -c \"rtmpdump --live -r %s" \
+                    "| mplayer -af volnorm=2:0.02 -quiet - > /dev/null 2>&1\"" \
+                    "> /dev/null 2>&1 &" % radioChannels[channel]
+            subprocess.call(cmd, shell=True)
+        else:
+            if channel == 1:
+                cmd = 'nohup mplayer -af volnorm=2:0.01 '\
+                + radioChannels[channel]
+            else:
+                cmd = 'nohup mplayer ' + radioChannels[channel]
+            subprocess.Popen(
+                cmd.split(),
+                stdout=open('/dev/null', 'w'),
+                stderr=open(MplayerLog, 'a'),
+                preexec_fn=os.setpgrp)
     
     else:
         killMplayer()
