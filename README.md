@@ -24,15 +24,15 @@ AFN のチャンネルは Encoder の...
 
 | Step | Channnel   | Color        | Timer |
 |------|:----------:|:------------:|:------|
-| 0    | 超 A&G     | 青色         | None  |
-| 1    | Tokyo      | 緑色         | None  |
-| 2    | Joe Radio  | シアン色     | None  |
-| 3    | Power Talk | 赤色         | None  |
-| 4    | The Voice  | マジェンダ色 | None  |
-| 5    | Freedom    | ?            | None  |
-| 6-24 | Joe Radio  | 緑色         | ~~~one hour~~~ |
+| 0    | 超 A&G     | 何か一意な色 | None  |
+| 1    | Tokyo      | 何か一意な色 | None  |
+| 2    | Joe Radio  | 何か一意な色 | None  |
+| 3    | Power Talk | 何か一意な色 | None  |
+| 4    | The Voice  | 何か一意な色 | None  |
+| 5    | Freedom    | 何か一意な色 | None  |
+| 6-24 | Joe Radio  | 何か一意な色 | ~~~one hour~~~ |
 
-となります。
+となります。色は配列の順番を種として特定のアルゴリズムで一意な色を自動的に生成されます。
 
 [![the thing](images/IMG0047.png)](images/IMG0054.m4v)
 
@@ -138,10 +138,11 @@ $ avrdude -c gpio -p m328p -U flash:w:firmware.hex
 
 
 ## 予定
-- ロータリーかスライダーで AFN のチャンネルを選択できるようにしたい。
+- ~~~ロータリーかスライダーで AFN のチャンネルを選択できるようにしたい。~~~
 - 折角の RPi3 なので BLE でコントロールできるようにしたい。
 - ニュースヘッドラインも追加したい。
-- AFN 以外のネットラジオも追加したい。
+- ~~~AFN 以外のネットラジオも追加したい。~~~
+- ~~~色。~~~
 
 
 ## 過去の版

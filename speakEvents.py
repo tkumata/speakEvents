@@ -16,6 +16,7 @@ import re
 import shlex
 #import threading
 import atexit
+import math
 
 # Global var
 home_dir = os.path.expanduser('~')
@@ -31,6 +32,9 @@ userid = ''
 passwd = ''
 radio_on = 0
 sleep = 0.1
+vol_agqr = 0.03
+vol_tko = 0.01
+vol_norm = 0.55
 
 # Set GrovePi+ ports.
 # encoder. if you use it, update firmware to patched v1.2.6. And Encoder work only D2 port.
@@ -96,12 +100,30 @@ radioChannels = [
     ]
 
 
+# Create color
+def generateRGB(seed):
+    seed1 = math.sqrt(seed+1)
+    seed2 = math.sqrt(seed1)
+    seed3 = math.sqrt(seed2)
+    list = []
+    
+    for i in [seed1, seed2, seed3]:
+        PHI = (1 + math.sqrt(5))/2
+        n = i * PHI - math.floor(i * PHI)
+        hue = int(n * 256)
+        list.append(hue)
+    
+    #list = [str(i) for i in list]
+    #return ",".join(list)
+    return list
+
+
 # Detect mplayer
 def detectMplayer():
     p = 0
      
     psCmd = subprocess.Popen(
-                ['ps', 'ax'],
+                ['ps', 'axw'],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 close_fds=True,
@@ -122,7 +144,7 @@ def detectMplayer():
 # Kill mplayer
 def killMplayer():
     psCmd = subprocess.Popen(
-                ['ps', 'ax'],
+                ['ps', 'axw'],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 close_fds=True,
@@ -160,7 +182,10 @@ def startRadio(channel, doPlay):
 #            t.cancel()
         
         # Turn Chainable RGB LED on
-        grovepi.chainableRgbLed_test(rgbLED, numLEDs, channel+1)
+        #grovepi.chainableRgbLed_test(rgbLED, numLEDs, channel+1)
+        rgb = generateRGB(channel)
+        grovepi.storeColor(rgb[0], rgb[1], rgb[2])
+        grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
         
         # If not found mplayer, run mplayer.
         print('====> start AFN channel: %s.') % radioChannels[channel]
@@ -179,15 +204,14 @@ def startRadio(channel, doPlay):
             
             # Bad script.
             cmd = "nohup sh -c \"rtmpdump --live -r %s" \
-                    "| mplayer -af volnorm=2:0.02 -quiet - > /dev/null 2>&1\"" \
-                    "> /dev/null 2>&1 &" % radioChannels[channel]
+                    "| mplayer -af volnorm=2:%s - > /dev/null 2>&1\"" \
+                    "> /dev/null 2>&1 &" % (radioChannels[channel], vol_agqr)
             subprocess.call(cmd, shell=True)
         else:
             if channel == 1:
-                cmd = 'nohup mplayer -af volnorm=2:0.01 '\
-                + radioChannels[channel]
+                cmd = "nohup mplayer -af volnorm=2:%s %s" % (vol_tko, radioChannels[channel])
             else:
-                cmd = 'nohup mplayer ' + radioChannels[channel]
+                cmd = "nohup mplayer -af volnorm=2:%s %s" % (vol_norm, radioChannels[channel])
             subprocess.Popen(
                 cmd.split(),
                 stdout=open('/dev/null', 'w'),
