@@ -101,21 +101,22 @@ radioChannels = [
 
 
 # Create color
-def generateRGB(seed):
-    seed1 = math.sqrt(seed+1)
-    seed2 = math.sqrt(seed1)
-    seed3 = math.sqrt(seed2)
-    list = []
+def generateRGB(v):
+    t = math.cos(4 * math.pi * v)
+    c = int(((-t / 2) + 0.5) * 255)
     
-    for i in [seed1, seed2, seed3]:
-        PHI = (1 + math.sqrt(5))/2
-        n = i * PHI - math.floor(i * PHI)
-        hue = int(n * 256)
-        list.append(hue)
-    
-    #list = [str(i) for i in list]
-    #return ",".join(list)
-    return list
+    if v >= 1.0:
+        return (255, 0, 0)
+    elif v >= 0.75:
+        return (255, c, 0)
+    elif v >= 0.5:
+        return (c, 255, 0)
+    elif v >= 0.25:
+        return (0, 255, c)
+    elif v >= 0:
+        return (0, c, 255)
+    else:
+        return (0, 0, 255)
 
 
 # Detect mplayer
@@ -175,7 +176,7 @@ def startRadio(channel, doPlay):
     if doPlay == 1:
         killMplayer()
         
-        if channel > 4:
+        if channel > 5:
             channel = 1
 #            t.start()
 #        else:
@@ -183,8 +184,9 @@ def startRadio(channel, doPlay):
         
         # Turn Chainable RGB LED on
         #grovepi.chainableRgbLed_test(rgbLED, numLEDs, channel+1)
-        rgb = generateRGB(channel)
-        grovepi.storeColor(rgb[0], rgb[1], rgb[2])
+        x = channel * 20
+        (r, g, b) = generateRGB(x/100.0)
+        grovepi.storeColor(r, g, b)
         grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
         
         # If not found mplayer, run mplayer.
@@ -204,8 +206,8 @@ def startRadio(channel, doPlay):
             
             # Bad script.
             cmd = "nohup sh -c \"rtmpdump --live -r %s" \
-                    "| mplayer -af volnorm=2:%s - > /dev/null 2>&1\"" \
-                    "> /dev/null 2>&1 &" % (radioChannels[channel], vol_agqr)
+                    " | mplayer -af volnorm=2:%s - > /dev/null 2>&1\"" \
+                    " > /dev/null 2>&1 &" % (radioChannels[channel], vol_agqr)
             subprocess.call(cmd, shell=True)
         else:
             if channel == 1:
@@ -487,11 +489,9 @@ if __name__ == '__main__':
                         [new_val, encoder_val] = grovepi.encoderRead()
                         print('========> Encoder: %d') % encoder_val
                         radio_on = 1
-                        sleep = 0.5
                         startRadio(encoder_val, radio_on)
                     else:
                         radio_on = 0
-                        sleep = 0.1
                         startRadio(0, radio_on)
                 else:
                     print('====> Locking...')
