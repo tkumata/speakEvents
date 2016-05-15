@@ -165,7 +165,8 @@ def kill_mplayer():
                 or ('mplayer -novideo' in line) \
                 or ('rtmpdump' in line):
             pid = int(line.split(None, 1)[0])
-            os.kill(pid, signal.SIGKILL)
+            #os.kill(pid, signal.SIGKILL)
+            os.kill(pid, signal.SIGTERM)
     
     if os.path.exists(MplayerLog):
         os.remove(MplayerLog)
