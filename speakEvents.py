@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
-import grovepi
-from pyicloud import PyiCloudService        # pip install pyicloud
 from ConfigParser import SafeConfigParser
 from distutils import spawn
 import datetime
 import locale
-import subprocess, signal
+import subprocess
+import signal
 import time
 import os
 import sys
@@ -17,6 +16,8 @@ import shlex
 #import threading
 import atexit
 import math
+import grovepi
+from pyicloud import PyiCloudService        # pip install pyicloud
 
 # Global var
 home_dir = os.path.expanduser('~')
@@ -73,6 +74,7 @@ allLedsExceptThis = 1
 thisLedAndInwards = 2
 thisLedAndOutwards = 3
 
+
 # Check text speaker
 if platform.system() == 'Linux':
     if spawn.find_executable('/home/pi/bin/atalk.sh'):
@@ -89,6 +91,7 @@ elif platform.system() == 'Darwin':
 else:
     quit()
 
+
 # Internet Radio channels
 radioChannels = [
     'rtmp://fms-base1.mitene.ad.jp/agqr/aandg22',
@@ -101,7 +104,7 @@ radioChannels = [
 
 
 # Create color
-def generateRGB(v):
+def generate_rgb_color(v):
     t = math.cos(4 * math.pi * v)
     c = int(((-t / 2) + 0.5) * 255)
     
@@ -120,41 +123,47 @@ def generateRGB(v):
 
 
 # Detect mplayer
-def detectMplayer():
-    p = 0
+def detect_mplayer():
+    pid = 0
      
     psCmd = subprocess.Popen(
-                ['ps', 'axw'],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                close_fds=True,
-                shell=False)
+        ['ps', 'axw'],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        close_fds=True,
+        shell=False
+        )
     out = psCmd.communicate()[0]
     
     for line in out.splitlines():
         if ('mplayer' in line and 'AFN' in line) \
-                or ('mplayer -' in line) or ('rtmpdump' in line):
-            p = int(line.split(None, 1)[0])
+                or ('mplayer -novideo' in line) \
+                or ('rtmpdump' in line):
+            pid = int(line.split(None, 1)[0])
     
-    if p > 0:
+    if pid > 0:
         return 1
     else:
         return 0
 
 
 # Kill mplayer
-def killMplayer():
+def kill_mplayer():
+    pid = 0
+    
     psCmd = subprocess.Popen(
-                ['ps', 'axw'],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                close_fds=True,
-                shell=False)
+        ['ps', 'axw'],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        close_fds=True,
+        shell=False
+        )
     out = psCmd.communicate()[0]
     
     for line in out.splitlines():
         if ('mplayer' in line and 'AFN' in line) \
-                or ('mplayer -' in line) or ('rtmpdump' in line):
+                or ('mplayer -novideo' in line) \
+                or ('rtmpdump' in line):
             pid = int(line.split(None, 1)[0])
             os.kill(pid, signal.SIGKILL)
     
@@ -166,7 +175,7 @@ def killMplayer():
 
 
 # AFN360 procedure, play and stop
-def startRadio(channel, doPlay):
+def start_radio(channel, doPlay):
     global t
     
     # create lock file
@@ -174,39 +183,27 @@ def startRadio(channel, doPlay):
     f.close()
     
     if doPlay == 1:
-        killMplayer()
+        kill_mplayer()
         
         if channel > 5:
             channel = 1
-#            t.start()
-#        else:
-#            t.cancel()
+            #t.start()
+        #else:
+            #t.cancel()
         
         # Turn Chainable RGB LED on
-        #grovepi.chainableRgbLed_test(rgbLED, numLEDs, channel+1)
-        x = channel * 20
-        (r, g, b) = generateRGB(x/100.0)
+        x = (channel * 21) / 100.0
+        (r, g, b) = generate_rgb_color(x)
+        print('====> color: %d, %d, %d') % (r, g, b)
         grovepi.storeColor(r, g, b)
         grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
         
         # If not found mplayer, run mplayer.
-        print('====> start AFN channel: %s.') % radioChannels[channel]
+        print('====> start Radio channel: %s.') % radioChannels[channel]
         if channel == 0:
-            #cmd1 = "rtmpdump --live -r %s" % radioChannels[channel]
-            #cmd2 = "mplayer -"
-            #p1 = subprocess.Popen(cmd1.split(),
-            #        stdout=subprocess.PIPE)
-            #p2 = subprocess.Popen(cmd2.split(),
-            #        stdout=open('/dev/null', 'w'),
-            #        stderr=open(MplayerLog, 'a'),
-            #        stdin=p1.stdout,
-            #        preexec_fn=os.setpgrp)
-            #p1.stdout.close()
-            #output = p2.communicate()[0]
-            
             # Bad script.
             cmd = "nohup sh -c \"rtmpdump --live -r %s" \
-                    " | mplayer -af volnorm=2:%s - > /dev/null 2>&1\"" \
+                    " | mplayer -novideo -af volnorm=2:%s - > /dev/null 2>&1\"" \
                     " > /dev/null 2>&1 &" % (radioChannels[channel], vol_agqr)
             subprocess.call(cmd, shell=True)
         else:
@@ -218,10 +215,12 @@ def startRadio(channel, doPlay):
                 cmd.split(),
                 stdout=open('/dev/null', 'w'),
                 stderr=open(MplayerLog, 'a'),
-                preexec_fn=os.setpgrp)
+                preexec_fn=os.setpgrp
+                )
     
     else:
-        killMplayer()
+        print('====> stop Radio channel: %s.') % radioChannels[channel]
+        kill_mplayer()
     
     # Remove lock file.
     os.remove(LockFileB2)
@@ -351,11 +350,11 @@ def get_weatherinfo2(url):
 
 
 #
-def loopDay(e):
+def loop_day(e):
     # 一日分のループ
     for event in e:
         # 個別イベントのループ
-        for key,value in event.items():
+        for key, value in event.items():
             if key == 'startDate':
                 hour = value[4]
                 min = value[5]
@@ -387,7 +386,7 @@ def loopDay(e):
 
 
 # speak events.
-def speakEvents():
+def speak_events():
     # create lock file
     f = open(LockFileB1, 'w')
     f.close()
@@ -419,7 +418,7 @@ def speakEvents():
         subprocess.call(cmd.split(), shell=False)
     else:
         events2 = sorted(events, key=lambda x:x['startDate']) # sort startDate
-        loopDay(events2)
+        loop_day(events2)
         endTalk = u'忘れ物はありませんか。以上'
         cmd = speaker + ' 100 "' + endTalk + '"'
         subprocess.call(cmd.split(), shell=False)
@@ -444,10 +443,10 @@ if __name__ == '__main__':
     grovepi.encoder_en()
     
     # Create threading object
-#    t = threading.Timer(3600, killMplayer)
+    #t = threading.Timer(3600, kill_mplayer)
     
     # Init mplayer
-    killMplayer()
+    kill_mplayer()
     
     while True:
         try:
@@ -457,7 +456,7 @@ if __name__ == '__main__':
                 if new_val:
                     print('====> Encoder: %d') % encoder_val
                     if not os.path.exists(LockFileB2):
-                        startRadio(encoder_val, radio_on)
+                        start_radio(encoder_val, radio_on)
             
             # Button
             if grovepi.digitalRead(icloudBtn) == 1:
@@ -466,9 +465,9 @@ if __name__ == '__main__':
                 # Turn feedback LED on
                 grovepi.digitalWrite(feedbackLED, 1)
                 
-                # Run speakEvents
+                # Run speak_events
                 if not os.path.exists(LockFileB1):
-                    speakEvents()
+                    speak_events()
                 else:
                     print('====> Locking...')
             
@@ -480,7 +479,7 @@ if __name__ == '__main__':
                 grovepi.digitalWrite(feedbackLED, 1)
                 
                 # Detect mplayer
-                radio_on = detectMplayer()
+                radio_on = detect_mplayer()
                 print('====> radio_on: %d') % radio_on
                 
                 # Run internet radio
@@ -489,10 +488,10 @@ if __name__ == '__main__':
                         [new_val, encoder_val] = grovepi.encoderRead()
                         print('========> Encoder: %d') % encoder_val
                         radio_on = 1
-                        startRadio(encoder_val, radio_on)
+                        start_radio(encoder_val, radio_on)
                     else:
                         radio_on = 0
-                        startRadio(0, radio_on)
+                        start_radio(0, radio_on)
                 else:
                     print('====> Locking...')
             
@@ -502,7 +501,7 @@ if __name__ == '__main__':
             print('====> ctrl + c')
             grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
             grovepi.digitalWrite(feedbackLED, 0)
-#            t.cancel()
+            #t.cancel()
             quit()
         except IOError:
             print('====> IO Error.')
