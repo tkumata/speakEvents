@@ -202,25 +202,27 @@ def start_radio(channel, doPlay):
         # If not found mplayer, run mplayer.
         print('====> start Radio channel: %s.') % radioChannels[channel]
         if channel == 0:
-            # Bad script.
+            # Bad script. But anti zombie process.
             cmd = "nohup sh -c \"rtmpdump --live -r %s" \
                     " | mplayer -novideo -af volnorm=2:%s - > /dev/null 2>&1\"" \
                     " > /dev/null 2>&1 &" % (radioChannels[channel], vol_agqr)
             subprocess.call(cmd, shell=True)
         else:
+            # Bad script. But anti zombie process.
             if channel == 1:
-                cmd = "nohup mplayer -af volnorm=2:%s %s" % (vol_tko, radioChannels[channel])
+                cmd = "nohup mplayer -af volnorm=2:%s %s > /dev/null 2>&1 &" % (vol_tko, radioChannels[channel])
             else:
-                cmd = "nohup mplayer -af volnorm=2:%s %s" % (vol_norm, radioChannels[channel])
-            subprocess.Popen(
-                cmd.split(),
-                stdout=open('/dev/null', 'w'),
-                stderr=open(MplayerLog, 'a'),
-                preexec_fn=os.setpgrp
-                )
+                cmd = "nohup mplayer -af volnorm=2:%s %s > /dev/null 2>&1 &" % (vol_norm, radioChannels[channel])
+            subprocess.call(cmd, shell=True)
+            #subprocess.Popen(
+            #    cmd.split(),
+            #    stdout=open('/dev/null', 'w'),
+            #    stderr=open(MplayerLog, 'a'),
+            #    preexec_fn=os.setpgrp
+            #    )
     
     else:
-        print('====> stop Radio channel: %s.') % radioChannels[channel]
+        print('====> stop Radio')
         kill_mplayer()
     
     # Remove lock file.
