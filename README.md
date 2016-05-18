@@ -106,19 +106,6 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 
 Encoder と Chainable RGB LED を同時に使うにはファームウェアにパッチ当てないといけません。パッチは私が作ったものでちゃんとした検証をしていませんのでご留意ください。「Encoder 使わないよ」と言う場合はファームウェアをいじらなくてもいいです。また、Encoder だけ使う場合はパッチを当てない v1.2.5 以上が必要です。
 
-```
---- /home/pi/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/grove_pi_v1_2_6.ino   2016-04-23 20:35:48.636875637 +0900
-+++ src/grove_pi_v1_2_6.ino 2016-05-04 09:09:57.028214361 +0900
-@@ -96,7 +96,7 @@ int j;
- void loop()
- {
-   long dur,RangeCm;
--  if(index==4)
-+  if(index==4 && flag==0)
-   {
-     flag=1;
-     //IR reciever pin set command
-```
 
 
 * Compile firmware v1.2.6 and install
