@@ -451,6 +451,15 @@ if __name__ == '__main__':
     # Init mplayer
     kill_mplayer()
     
+    # start up blink
+    startup_blink = [7,6,5,4,3,2,1,0]
+    [new_val, encoder_val] = grovepi.encoderRead()
+    for i in startup_blink:
+        grovepi.chainableRgbLed_test(rgbLED, numLEDs, i)
+        time.sleep(.1)
+    grovepi.storeColor(0, 255, 0)
+    grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
+    
     while True:
         try:
             # Encoder
