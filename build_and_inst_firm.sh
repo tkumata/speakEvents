@@ -9,14 +9,21 @@ read -n1 -p "Do you execute this? [y/N]: " ans
 
 if [ "$ans" = "y" -o "$ans" = "Y" ]; then
     current_dir=${PWD##*/}
+    src_dir="~/work/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6"
+    #src_dir="~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6"
+    i=6
 
     if [ "$current_dir" = "firm126" ]; then
-        sudo /etc/init.d/speakEventsService.sh stop
+        sE_pid=$(ps -e -o pid,cmd | grep -E "speakEvents*" | grep -v grep | awk '{print $1}')
+        if [ "$sE_pid" -gt 0 ]; then
+            sudo /etc/init.d/speakEventsService.sh stop
+        fi
 
-        rm -rf .build
-        rm -rf src
-        cp -pr ~/work/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6 src
-        #cp -pr ~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6 src
+        if [ -d "$src_dir" ]; then
+            rm -rf .build
+            rm -rf src
+            cp -pr "$src_dir" src
+        fi
 
         echo "Building firmware"
         ino list-models
@@ -25,17 +32,15 @@ if [ "$ans" = "y" -o "$ans" = "Y" ]; then
         echo "Installing firmware"
         cd .build/atmega328
         avrdude -c gpio -p m328p -U flash:w:firmware.hex
-
-        echo "Finish"
-
-        i=6
-        while [ "$i" -gt 0 ]; do
-            i=$(($i-1))
-            echo $i
-            sleep 1
-        done
-        sudo reboot
-        #sudo /etc/init.d/speakEventsService.sh start
+        if [ "$?" -eq 0 ]; then
+            echo "Finish"
+            while [ "$i" -gt 0 ]; do
+                i=$(($i-1))
+                echo $i
+                sleep 1
+            done
+            sudo reboot
+        fi
     else
         echo
         echo "woring directory is not firm126."

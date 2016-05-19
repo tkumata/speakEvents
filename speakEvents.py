@@ -33,9 +33,9 @@ userid = ''
 passwd = ''
 radio_on = 0
 sleep = 0.1
-vol_agqr = 0.03
+vol_agqr = 0.04
 vol_tko = 0.01
-vol_norm = 0.55
+vol_norm = 0.60
 
 # Set GrovePi+ ports.
 # encoder. if you use it, update firmware to patched v1.2.6. And Encoder work only D2 port.
@@ -457,8 +457,12 @@ if __name__ == '__main__':
     for i in startup_blink:
         grovepi.chainableRgbLed_test(rgbLED, numLEDs, i)
         time.sleep(.1)
-    grovepi.storeColor(0, 255, 0)
-    grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
+    if not new_val == 0:
+        grovepi.storeColor(255, 0, 0)
+        grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
+    else:
+        grovepi.storeColor(0, 255, 0)
+        grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
     
     while True:
         try:
