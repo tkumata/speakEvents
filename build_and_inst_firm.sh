@@ -3,7 +3,6 @@ echo "======================"
 echo "Burn GrovePi+ firmware"
 echo "======================"
 echo
-
 echo "Attention!!! This script compile and BURN firmware."
 read -n1 -p "Do you execute this? [y/N]: " ans
 
@@ -44,10 +43,12 @@ if [ "$ans" = "y" -o "$ans" = "Y" ]; then
     else
         echo
         echo "woring directory is not firm126."
+        echo
         exit 1
     fi
 else
     echo
     echo "exit"
+    echo
     exit 0
 fi
