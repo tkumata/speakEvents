@@ -36,7 +36,7 @@ passwd = ''
 # radio on flag
 radio_on = 0
 # sound volume
-vol_agqr = 0.04
+vol_agqr = 0.03
 vol_tko = 0.01
 vol_norm = 0.60
 
@@ -439,7 +439,19 @@ def speak_events():
 
 
 def ledOff():
+    print('====> Turn LED off')
     grovepi.digitalWrite(feedbackLED, 0)
+
+
+class MyThreading(object):
+    def __init__(self, interval, function, args=[], kwargs={}):
+        self._interval = interval
+        self._function = function
+        self._args = args
+        self._kwargs = kwargs
+    def start(self):
+        t = threading.Timer(self._interval, self._function, *self._args, **self._kwargs)
+        t.start()
 
 
 # main
@@ -456,7 +468,7 @@ if __name__ == '__main__':
     
     # Create threading object
     #t = threading.Timer(3600, kill_mplayer)
-    thread_led = threading.Timer(45, ledOff)
+    thread_led = MyThreading(30, ledOff, ())
     
     # Init mplayer
     kill_mplayer()
@@ -534,7 +546,6 @@ if __name__ == '__main__':
             grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
             grovepi.digitalWrite(feedbackLED, 0)
             #t.cancel()
-            thread_led.cancel()
             quit()
         except IOError:
             print('====> IO Error.')
