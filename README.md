@@ -17,6 +17,7 @@ Raspberry Pi 3 (以下 RPi3) に BLE やボタンなどから何かしらの入�
 | D2   | Encoder           | インターネットラジオのチャンネルの変更 | D2 only | 
 | D4   | Button            | 天気情報と iCloud Calendar を読み上げ  ||
 | D5   | Button            | インターネットラジオの再生、停止       ||
+| D6   | Button            | LED のボタン                           | threading で 30 秒だけ点灯させる |
 | D7   | Chainable RGB LED | チャンネルの表現                       ||
 | D8   | Normal LED        | ボタンを押した時のフィードバック用     ||
 
@@ -30,7 +31,7 @@ AFN のチャンネルは Encoder の...
 | 3    | Power Talk | 何か一意な色 | None  |
 | 4    | The Voice  | 何か一意な色 | None  |
 | 5    | Freedom    | 何か一意な色 | None  |
-| 6-24 | Joe Radio  | 何か一意な色 | ~~~one hour~~~ |
+| 6-24 | Joe Radio  | 何か一意な色 | ~~one hour~~ |
 
 となります。色は配列の順番を種として特定のアルゴリズムで一意な色を自動的に生成されます。
 
@@ -40,7 +41,7 @@ AFN のチャンネルは Encoder の...
 ## 必要なハード
 1. Raspberry Pi 3
 2. GrovePi+ (IMPORTANT!! Firmware is v1.2.5 over and apply following patch.)
-3. Two buttons for Grove (D4, D5)
+3. Buttons for Grove (D4, D5, D6)
 4. Chainable RGB LED (D7)
 5. LED (D8)
 6. Encoder (D2) (IMPORTANT!! Grove Encoder works on D2 port only.)

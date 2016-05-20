@@ -13,7 +13,7 @@ import platform
 import requests
 import re
 import shlex
-#import threading
+import threading
 import atexit
 import math
 import grovepi
@@ -25,36 +25,43 @@ config_file = home_dir + '/.speakevents'
 LockFileB1 = '/tmp/speakEventsLockfileB1'
 LockFileB2 = '/tmp/speakEventsLockfileB2'
 MplayerLog = '/tmp/speakEventsMpLogfile'
+sleep = 0.1
 # Weather info for 'Kanto Plain'
 WeatherURL1 = 'http://www.tenki.jp/forecast/3/16/'
 # Pinpoint weather info for 'Setagaya-ku'
 WeatherURL2 = 'http://www.tenki.jp/forecast/3/16/4410/13112-daily.html'
+# iCloud account
 userid = ''
 passwd = ''
+# radio on flag
 radio_on = 0
-sleep = 0.1
+# sound volume
 vol_agqr = 0.04
 vol_tko = 0.01
 vol_norm = 0.60
 
 # Set GrovePi+ ports.
-# encoder. if you use it, update firmware to patched v1.2.6. And Encoder work only D2 port.
+# encoder. if you use it, update firmware to patched v1.2.6.
+# And Encoder work only D2 port.
 encoderRtr2 = 2
 encoderRtr3 = 3
 # button for iCloud
 icloudBtn = 4
 # button for radio
 radioBtn = 5
+# button for led
+lightBtn = 6
 # chainable RGB LED
 # if you use this with Encoder, update firmware and apply patch
 rgbLED = 7
+# number of chained RGB LED
+numLEDs = 1
 # normal LED
 feedbackLED = 8
-# number of chained LED
-numLEDs = 1
 
 grovepi.pinMode(icloudBtn, 'INPUT')
 grovepi.pinMode(radioBtn, 'INPUT')
+grovepi.pinMode(lightBtn, 'INPUT')
 grovepi.pinMode(rgbLED, 'OUTPUT')
 grovepi.pinMode(feedbackLED, 'OUTPUT')
 
@@ -165,7 +172,6 @@ def kill_mplayer():
                 or ('mplayer -novideo' in line) \
                 or ('rtmpdump' in line):
             pid = int(line.split(None, 1)[0])
-            #os.kill(pid, signal.SIGKILL)
             os.kill(pid, signal.SIGTERM)
     
     if os.path.exists(MplayerLog):
@@ -220,7 +226,6 @@ def start_radio(channel, doPlay):
             #    stderr=open(MplayerLog, 'a'),
             #    preexec_fn=os.setpgrp
             #    )
-    
     else:
         print('====> stop Radio')
         kill_mplayer()
@@ -433,6 +438,10 @@ def speak_events():
     grovepi.digitalWrite(feedbackLED, 0)
 
 
+def ledOff():
+    grovepi.digitalWrite(feedbackLED, 0)
+
+
 # main
 if __name__ == '__main__':
     # Init LED
@@ -447,6 +456,7 @@ if __name__ == '__main__':
     
     # Create threading object
     #t = threading.Timer(3600, kill_mplayer)
+    thread_led = threading.Timer(45, ledOff)
     
     # Init mplayer
     kill_mplayer()
@@ -511,6 +521,12 @@ if __name__ == '__main__':
                 else:
                     print('====> Locking...')
             
+            # Button
+            if grovepi.digitalRead(lightBtn) == 1:
+                print('====> Button: D%d') % lightBtn
+                grovepi.digitalWrite(feedbackLED, 1)
+                thread_led.start()
+            
             time.sleep(sleep)
         
         except KeyboardInterrupt:
@@ -518,6 +534,7 @@ if __name__ == '__main__':
             grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
             grovepi.digitalWrite(feedbackLED, 0)
             #t.cancel()
+            thread_led.cancel()
             quit()
         except IOError:
             print('====> IO Error.')
