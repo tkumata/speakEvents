@@ -158,6 +158,7 @@ def detect_mplayer():
 
 # Kill mplayer
 def kill_mplayer():
+    global colorRGB
     pid = 0
     
     psCmd = subprocess.Popen(
