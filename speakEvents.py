@@ -39,6 +39,8 @@ radio_on = 0
 vol_agqr = 0.03
 vol_tko = 0.01
 vol_norm = 0.60
+# color
+colorRGB = [0, 255, 0]
 
 # Set GrovePi+ ports.
 # encoder. if you use it, update firmware to patched v1.2.6.
@@ -177,13 +179,16 @@ def kill_mplayer():
     if os.path.exists(MplayerLog):
         os.remove(MplayerLog)
     
+    # Set color
+    colorRGB = [0, 0, 0]
+    
     # Turn Chainable RGB LED off
     grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
 
 
 # AFN360 procedure, play and stop
 def start_radio(channel, doPlay):
-    global t
+    global colorRGB
     
     # create lock file
     f = open(LockFileB2, 'w')
@@ -201,6 +206,7 @@ def start_radio(channel, doPlay):
         # Turn Chainable RGB LED on
         x = (channel * 21) / 100.0
         (r, g, b) = generate_rgb_color(x)
+        colorRGB = [r, g, b]
         print('====> color: %d, %d, %d') % (r, g, b)
         grovepi.storeColor(r, g, b)
         grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
@@ -247,7 +253,10 @@ def start_radio(channel, doPlay):
 #weather1 = http://www.tenki.jp/forecast/3/16/
 #weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 def get_config():
-    global WeatherURL1, WeatherURL2, userid, passwd
+    global WeatherURL1
+    global WeatherURL2
+    global userid
+    global passwd
     
     if not os.path.isfile(config_file):
         print u'====> config file not found.'
@@ -438,9 +447,10 @@ def speak_events():
     grovepi.digitalWrite(feedbackLED, 0)
 
 
-def ledOff():
-    print('====> Turn LED off')
-    grovepi.digitalWrite(feedbackLED, 0)
+def return_color():
+    global colorRGB
+    grovepi.storeColor(colorRGB[0], colorRGB[1], colorRGB[2])
+    grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
 
 
 class MyThreading(object):
@@ -468,7 +478,7 @@ if __name__ == '__main__':
     
     # Create threading object
     #t = threading.Timer(3600, kill_mplayer)
-    thread_led = MyThreading(30, ledOff, ())
+    thread_led = MyThreading(40, return_color, ())
     
     # Init mplayer
     kill_mplayer()
@@ -483,7 +493,7 @@ if __name__ == '__main__':
         grovepi.storeColor(255, 0, 0)
         grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
     else:
-        grovepi.storeColor(0, 255, 0)
+        grovepi.storeColor(colorRGB[0], colorRGB[1], colorRGB[2])
         grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
     
     while True:
@@ -496,7 +506,7 @@ if __name__ == '__main__':
                     if not os.path.exists(LockFileB2):
                         start_radio(encoder_val, radio_on)
             
-            # Button
+            # Button iCloud Calendar
             if grovepi.digitalRead(icloudBtn) == 1:
                 print('====> Button: D%d') % icloudBtn
                 
@@ -509,7 +519,7 @@ if __name__ == '__main__':
                 else:
                     print('====> Locking...')
             
-            # Button
+            # Button Radio
             if grovepi.digitalRead(radioBtn) == 1:
                 print('====> Button: D%d') % radioBtn
                 
@@ -533,10 +543,11 @@ if __name__ == '__main__':
                 else:
                     print('====> Locking...')
             
-            # Button
+            # Button RGB LED
             if grovepi.digitalRead(lightBtn) == 1:
                 print('====> Button: D%d') % lightBtn
-                grovepi.digitalWrite(feedbackLED, 1)
+                grovepi.storeColor(255, 255, 255)
+                grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
                 thread_led.start()
             
             time.sleep(sleep)
