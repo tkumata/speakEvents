@@ -7,6 +7,7 @@ Raspberry Pi 3 (以下 RPi3) に BLE やボタンなどから何かしらの入�
 - tenki.jp の天気情報を音声でお知らせ
 - iCloud 内の当日の全予定を音声でお知らせ
 - AFN 360 の再生 (RGB LED でチャンネル毎に色を変える)
+- RGB LED を 40 秒点灯 (暗い部屋用の一時的なトーチ)
 
 音声なので忙しい場合でも、何かしながら予定の確認ができます。
 
@@ -17,7 +18,7 @@ Raspberry Pi 3 (以下 RPi3) に BLE やボタンなどから何かしらの入�
 | D2   | Encoder           | インターネットラジオのチャンネルの変更 | D2 only | 
 | D4   | Button            | 天気情報と iCloud Calendar を読み上げ  ||
 | D5   | Button            | インターネットラジオの再生、停止       ||
-| D6   | Button            | LED のボタン                           | threading で 30 秒だけ点灯させる |
+| D6   | Button            | LED のボタン                           | threading で 40 秒だけ点灯させる |
 | D7   | Chainable RGB LED | チャンネルの表現                       ||
 | D8   | Normal LED        | ボタンを押した時のフィードバック用     ||
 
