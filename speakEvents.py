@@ -26,19 +26,25 @@ LockFileB1 = '/tmp/speakEventsLockfileB1'
 LockFileB2 = '/tmp/speakEventsLockfileB2'
 MplayerLog = '/tmp/speakEventsMpLogfile'
 sleep = 0.1
+
 # Weather info for 'Kanto Plain'
 WeatherURL1 = 'http://www.tenki.jp/forecast/3/16/'
+
 # Pinpoint weather info for 'Setagaya-ku'
 WeatherURL2 = 'http://www.tenki.jp/forecast/3/16/4410/13112-daily.html'
+
 # iCloud account
 userid = ''
 passwd = ''
+
 # radio on flag
 radio_on = 0
+
 # sound volume
 vol_agqr = 0.03
 vol_tko = 0.01
 vol_norm = 0.60
+
 # color
 colorRGB = [0, 255, 0]
 
@@ -47,17 +53,23 @@ colorRGB = [0, 255, 0]
 # And Encoder work only D2 port.
 encoderRtr2 = 2
 encoderRtr3 = 3
+
 # button for iCloud
 icloudBtn = 4
+
 # button for radio
 radioBtn = 5
+
 # button for led
 lightBtn = 6
+
 # chainable RGB LED
 # if you use this with Encoder, update firmware and apply patch
 rgbLED = 7
+
 # number of chained RGB LED
 numLEDs = 1
+
 # normal LED
 feedbackLED = 8
 
@@ -208,9 +220,9 @@ def start_radio(channel, doPlay):
         x = (channel * 21) / 100.0
         (r, g, b) = generate_rgb_color(x)
         colorRGB = [r, g, b]
-        print('====> color: %d, %d, %d') % (r, g, b)
         grovepi.storeColor(r, g, b)
         grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
+        print('====> color: %d, %d, %d') % (r, g, b)
         
         # If not found mplayer, run mplayer.
         print('====> start Radio channel: %s.') % radioChannels[channel]
@@ -314,6 +326,7 @@ def get_weatherinfo1(url):
     html = req.text
     strPattern = r'<h2 class="sub_title">(.*)</p>'
     matches = re.finditer(strPattern, html)
+    
     for match in matches:
         w = htmlTagPattern.sub('', match.groups()[0])
     
@@ -336,6 +349,7 @@ def get_weatherinfo2(url):
     tempPattern = ur'<td class="temp"><span class="bold">(.*)</span>℃</td>'
     matches = re.finditer(tempPattern, todaysHtml)
     info.append(u'気温')
+    
     for match in matches:
         tempN = htmlTagPattern.sub('', match.groups()[0])
         info.append(tempN + u'度')
@@ -346,6 +360,7 @@ def get_weatherinfo2(url):
     rainPattern = ur'<td>(.*)</td>'
     matches = re.finditer(rainPattern, todaysHtml)
     info.append(u'降水確率')
+    
     for match in matches:
         rainN = htmlTagPattern.sub('', match.groups()[0])
         if rainN == '---':
@@ -376,10 +391,12 @@ def loop_day(e):
             if key == 'startDate':
                 hour = value[4]
                 min = value[5]
+                
                 if hour == 0 and min == 0:
                     eventTime = u'終日'
                 else:
                     eventTime = str(hour) + u'時' + str(min) + u'分から'
+                
                 # print eventTime
                 cmd = speaker + ' 130 "' + eventTime + '"'
                 subprocess.call(cmd.split(), shell=False)
@@ -387,10 +404,12 @@ def loop_day(e):
             if key == 'endDate':
                 hour = value[4]
                 min = value[5]
+                
                 if hour == 0 and min == 0:
                     eventEndTime = u'、'
                 else:
                     eventEndTime = str(hour) + u'時' + str(min) + u'分まで'
+                
                 # print eventEndTime
                 cmd = speaker + ' 130 "' + eventEndTime + '"'
                 subprocess.call(cmd.split(), shell=False)
@@ -425,6 +444,7 @@ def speak_events():
         for info in WeatherInfo2:
             cmd = speaker + ' 100 "' + info + '"'
             subprocess.call(cmd.split(), shell=False)
+        
         time.sleep(1)
     
     # Speak Events
@@ -450,6 +470,7 @@ def speak_events():
 
 def return_color():
     global colorRGB
+    
     grovepi.storeColor(colorRGB[0], colorRGB[1], colorRGB[2])
     grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
 
@@ -486,16 +507,20 @@ if __name__ == '__main__':
     
     # start up blink
     startup_blink = [7,6,5,4,3,2,1,0]
-    [new_val, encoder_val] = grovepi.encoderRead()
     for i in startup_blink:
         grovepi.chainableRgbLed_test(rgbLED, numLEDs, i)
         time.sleep(.1)
+    
+    [new_val, encoder_val] = grovepi.encoderRead()
+    
     if not new_val == 0:
-        grovepi.storeColor(255, 0, 0)
-        grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
-    else:
+        colorRGB = [255, 0, 0]
         grovepi.storeColor(colorRGB[0], colorRGB[1], colorRGB[2])
         grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
+    #else:
+    #    colorRGB = [0, 255, 0]
+    #    grovepi.storeColor(colorRGB[0], colorRGB[1], colorRGB[2])
+    #    grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
     
     while True:
         try:
@@ -542,7 +567,7 @@ if __name__ == '__main__':
                         radio_on = 0
                         start_radio(0, radio_on)
                 else:
-                    print('====> Locking...')
+                    print('========> Locking...')
             
             # Button RGB LED
             if grovepi.digitalRead(lightBtn) == 1:

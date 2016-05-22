@@ -28,7 +28,7 @@ do_start() {
 do_stop() {
     # if it's stop, then just kill the process
     echo "Stopping spaekEvents for $USER..."
-    kill -TERM `ps axw | pgrep -f speakEvents.py`
+    kill -9 `ps axw | pgrep -f speakEvents.py`
     #kill -TERM `ps axw | pgrep -f mplayer`
     echo "speakEvents stop."
 }

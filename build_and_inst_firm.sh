@@ -13,8 +13,8 @@ if [ "$ans" = "y" -o "$ans" = "Y" ]; then
     i=6
 
     if [ "$current_dir" = "firm126" ]; then
-        sE_pid=$(ps -e -o pid,cmd | grep -E "speakEvents*" | grep -v grep | awk '{print $1}')
-        if [ "$sE_pid" -gt 0 ]; then
+        speakEvents_pid=$(ps -e -o pid,cmd | grep -E "speakEvents*" | grep -v grep | awk '{print $1}')
+        if [ "${speakEvents_pid:-null}" != null ]; then
             sudo /etc/init.d/speakEventsService.sh stop
         fi
 
