@@ -20,12 +20,12 @@ import grovepi
 from pyicloud import PyiCloudService        # pip install pyicloud
 
 # Global var
-home_dir = os.path.expanduser('~')
-config_file = home_dir + '/.speakevents'
-LockFileB1 = '/tmp/speakEventsLockfileB1'
-LockFileB2 = '/tmp/speakEventsLockfileB2'
-MplayerLog = '/tmp/speakEventsMpLogfile'
-sleep = 0.1
+homeDir = os.path.expanduser('~')
+config_file = homeDir + '/.speakevents'
+LockFile1 = '/tmp/speakEventsLockfile1'
+LockFile2 = '/tmp/speakEventsLockfile2'
+mplayerLog = '/tmp/speakEventsMpLogfile'
+sleep_time = 0.1
 
 # Weather info for 'Kanto Plain'
 WeatherURL1 = 'http://www.tenki.jp/forecast/3/16/'
@@ -189,8 +189,8 @@ def kill_mplayer():
             pid = int(line.split(None, 1)[0])
             os.kill(pid, signal.SIGTERM)
     
-    if os.path.exists(MplayerLog):
-        os.remove(MplayerLog)
+    if os.path.exists(mplayerLog):
+        os.remove(mplayerLog)
     
     # Set color
     colorRGB = [0, 0, 0]
@@ -204,7 +204,7 @@ def start_radio(channel, doPlay):
     global colorRGB
     
     # create lock file
-    f = open(LockFileB2, 'w')
+    f = open(LockFile2, 'w')
     f.close()
     
     if doPlay == 1:
@@ -242,7 +242,7 @@ def start_radio(channel, doPlay):
             #subprocess.Popen(
             #    cmd.split(),
             #    stdout=open('/dev/null', 'w'),
-            #    stderr=open(MplayerLog, 'a'),
+            #    stderr=open(mplayerLog, 'a'),
             #    preexec_fn=os.setpgrp
             #    )
     else:
@@ -250,7 +250,7 @@ def start_radio(channel, doPlay):
         kill_mplayer()
     
     # Remove lock file.
-    os.remove(LockFileB2)
+    os.remove(LockFile2)
     
     # Turn feedback LED off
     grovepi.digitalWrite(feedbackLED, 0)
@@ -425,7 +425,7 @@ def loop_day(e):
 # speak events.
 def speak_events():
     # create lock file
-    f = open(LockFileB1, 'w')
+    f = open(LockFile1, 'w')
     f.close()
     
     # Get config
@@ -462,7 +462,7 @@ def speak_events():
         subprocess.call(cmd.split(), shell=False)
     
     # Remove lock file.
-    os.remove(LockFileB1)
+    os.remove(LockFile1)
     
     # Turn feedback LED off
     grovepi.digitalWrite(feedbackLED, 0)
@@ -529,7 +529,7 @@ if __name__ == '__main__':
                 [new_val, encoder_val] = grovepi.encoderRead()
                 if new_val:
                     print('====> Encoder: %d') % encoder_val
-                    if not os.path.exists(LockFileB2):
+                    if not os.path.exists(LockFile2):
                         start_radio(encoder_val, radio_on)
             
             # Button iCloud Calendar
@@ -540,7 +540,7 @@ if __name__ == '__main__':
                 grovepi.digitalWrite(feedbackLED, 1)
                 
                 # Run speak_events
-                if not os.path.exists(LockFileB1):
+                if not os.path.exists(LockFile1):
                     speak_events()
                 else:
                     print('====> Locking...')
@@ -557,7 +557,7 @@ if __name__ == '__main__':
                 print('====> radio_on: %d') % radio_on
                 
                 # Run internet radio
-                if not os.path.exists(LockFileB2):
+                if not os.path.exists(LockFile2):
                     if radio_on == 0:
                         [new_val, encoder_val] = grovepi.encoderRead()
                         print('========> Encoder: %d') % encoder_val
@@ -576,7 +576,7 @@ if __name__ == '__main__':
                 grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
                 thread_led.start()
             
-            time.sleep(sleep)
+            time.sleep(sleep_time)
         
         except KeyboardInterrupt:
             print('====> ctrl + c')
