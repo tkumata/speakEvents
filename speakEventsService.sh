@@ -10,27 +10,35 @@
 # Description: Start speakEvents Server at boot time.
 ### END INIT INFO
 
-set -e
-
 #/etc/init.d/speakEventsService.sh
 
 export USER='pi'
 eval cd ~$USER
+MY_PID="`ps axw | pgrep -f speakEvents.py`"
+
+set -eu
 
 do_start() {
     # if it's start, then start vncserver using the details below
-    echo "Starting spaekEvents for $USER..."
-    su $USER -c 'nohup /home/pi/bin/speakEvents/speakEvents.py > /dev/null 2>&1 &'
-    # su $USER -c 'nohup python -u /home/pi/bin/speakEvents/speakEvents.py > /tmp/speakEvents.log &'
-    echo "speakEvents starts."
+    if [ "${MY_PID:-null}" = null ]; then
+        echo "Starting spaekEvents for $USER..."
+        su $USER -c 'nohup /home/pi/bin/speakEvents/speakEvents.py > /dev/null 2>&1 &'
+        # su $USER -c 'nohup python -u /home/pi/bin/speakEvents/speakEvents.py > /tmp/speakEvents.log &'
+        echo "speakEvents starts."
+    else
+        echo "speakEvents is running already."
+    fi
 }
 
 do_stop() {
     # if it's stop, then just kill the process
-    echo "Stopping spaekEvents for $USER..."
-    kill -9 `ps axw | pgrep -f speakEvents.py`
-    #kill -TERM `ps axw | pgrep -f mplayer`
-    echo "speakEvents stop."
+    if [ "${MY_PID:-null}" != null ]; then
+        echo "Stopping spaekEvents for $USER..."
+        kill -9 "$MY_PID"
+        echo "speakEvents stop."
+    else
+        echo "speakEvents stopped already."
+    fi
 }
 
 # Check the state of the command: this'll either be start or stop
