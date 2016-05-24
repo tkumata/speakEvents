@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
-from ConfigParser import SafeConfigParser
-from distutils import spawn
 import datetime
 import locale
 import subprocess
@@ -16,78 +14,86 @@ import shlex
 import threading
 import atexit
 import math
+from ConfigParser import SafeConfigParser
+from distutils import spawn
+# 3rd party modules
 import grovepi
 from pyicloud import PyiCloudService        # pip install pyicloud
 
 # Global var
-homeDir = os.path.expanduser('~')
-config_file = homeDir + '/.speakevents'
-LockFile1 = '/tmp/speakEventsLockfile1'
-LockFile2 = '/tmp/speakEventsLockfile2'
-mplayerLog = '/tmp/speakEventsMpLogfile'
+home_dir = os.path.expanduser('~')
+config_file = home_dir + '/.speakevents'
+lock_file1 = '/tmp/speakEventsLockfile1'
+lock_file2 = '/tmp/speakEventsLockfile2'
+mplayer_log = '/tmp/speakEventsMpLogfile'
 sleep_time = 0.1
 
 # Weather info for 'Kanto Plain'
-WeatherURL1 = 'http://www.tenki.jp/forecast/3/16/'
+weather_URL1 = 'http://www.tenki.jp/forecast/3/16/'
 
 # Pinpoint weather info for 'Setagaya-ku'
-WeatherURL2 = 'http://www.tenki.jp/forecast/3/16/4410/13112-daily.html'
+weather_URL2 = 'http://www.tenki.jp/forecast/3/16/4410/13112-daily.html'
 
 # iCloud account
 userid = ''
 passwd = ''
 
-# radio on flag
+# Flag, turn radio on
 radio_on = 0
 
-# sound volume
+# Normalized sound volume
 vol_agqr = 0.03
 vol_tko = 0.01
 vol_norm = 0.60
 
-# color
-colorRGB = [0, 255, 0]
+# Init RGB LED's color
+color_rgb = [0, 255, 0]
 
 # Set GrovePi+ ports.
-# encoder. if you use it, update firmware to patched v1.2.6.
+#
+# If you use Encoder, update firmware to v1.2.6 with patch.
 # And Encoder work only D2 port.
-encoderRtr2 = 2
-encoderRtr3 = 3
+# encoderPort2 = 2
+# encoderPort3 = 3
 
-# button for iCloud
-icloudBtn = 4
+# Button port for iCloud
+icloudBtnPort = 4
 
-# button for radio
-radioBtn = 5
+# Button port for radio
+radioBtnPort = 5
 
-# button for led
-lightBtn = 6
+# Button port for LED
+lightBtnPort = 6
 
-# chainable RGB LED
+# Chainable RGB LED port
 # if you use this with Encoder, update firmware and apply patch
-rgbLED = 7
+rgbLEDPort = 7
 
-# number of chained RGB LED
-numLEDs = 1
+# Number of chained RGB LED
+num_of_leds = 1
 
-# normal LED
-feedbackLED = 8
+# Normal LED port
+feedbackLEDPort = 8
 
-grovepi.pinMode(icloudBtn, 'INPUT')
-grovepi.pinMode(radioBtn, 'INPUT')
-grovepi.pinMode(lightBtn, 'INPUT')
-grovepi.pinMode(rgbLED, 'OUTPUT')
-grovepi.pinMode(feedbackLED, 'OUTPUT')
+grovepi.pinMode(icloudBtnPort, 'INPUT')
+grovepi.pinMode(radioBtnPort, 'INPUT')
+grovepi.pinMode(lightBtnPort, 'INPUT')
+grovepi.pinMode(rgbLEDPort, 'OUTPUT')
+grovepi.pinMode(feedbackLEDPort, 'OUTPUT')
 
+# Init Grove Encoder
+atexit.register(grovepi.encoder_dis)
+grovepi.encoder_en()
+    
 # test colors used in grovepi.chainableRgbLed_test()
-testColorBlack = 0   # 0b000 #000000
-testColorBlue = 1    # 0b001 #0000FF
-testColorGreen = 2   # 0b010 #00FF00
-testColorCyan = 3    # 0b011 #00FFFF
-testColorRed = 4     # 0b100 #FF0000
-testColorMagenta = 5 # 0b101 #FF00FF
-testColorYellow = 6  # 0b110 #FFFF00
-testColorWhite = 7   # 0b111 #FFFFFF
+# testColorBlack = 0   # 0b000 #000000
+# testColorBlue = 1    # 0b001 #0000FF
+# testColorGreen = 2   # 0b010 #00FF00
+# testColorCyan = 3    # 0b011 #00FFFF
+# testColorRed = 4     # 0b100 #FF0000
+# testColorMagenta = 5 # 0b101 #FF00FF
+# testColorYellow = 6  # 0b110 #FFFF00
+# testColorWhite = 7   # 0b111 #FFFFFF
 
 # patterns used in grovepi.chainableRgbLed_pattern()
 thisLedOnly = 0
@@ -124,10 +130,10 @@ radioChannels = [
     ]
 
 
-# Create color
+# Create simple color
 def generate_rgb_color(v):
-    t = math.cos(4 * math.pi * v)
-    c = int(((-t / 2) + 0.5) * 255)
+    t1 = math.cos(4 * math.pi * v)
+    c = int(((-t1 / 2) + 0.5) * 255)
     
     if v >= 1.0:
         return (255, 0, 0)
@@ -147,14 +153,14 @@ def generate_rgb_color(v):
 def detect_mplayer():
     pid = 0
      
-    psCmd = subprocess.Popen(
+    ps_cmd = subprocess.Popen(
         ['ps', 'axw'],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         close_fds=True,
         shell=False
         )
-    out = psCmd.communicate()[0]
+    out = ps_cmd.communicate()[0]
     
     for line in out.splitlines():
         if ('mplayer' in line and 'AFN' in line) \
@@ -170,41 +176,41 @@ def detect_mplayer():
 
 # Kill mplayer
 def kill_mplayer():
-    global colorRGB
+    global color_rgb
     pid = 0
     
-    psCmd = subprocess.Popen(
+    ps_cmd = subprocess.Popen(
         ['ps', 'axw'],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         close_fds=True,
         shell=False
         )
-    out = psCmd.communicate()[0]
+    out = ps_cmd.communicate()[0]
     
     for line in out.splitlines():
         if ('mplayer' in line and 'AFN' in line) \
                 or ('mplayer -novideo' in line) \
                 or ('rtmpdump' in line):
             pid = int(line.split(None, 1)[0])
-            os.kill(pid, signal.SIGTERM)
+            if pid > 0:
+                os.kill(pid, signal.SIGTERM)
     
-    if os.path.exists(mplayerLog):
-        os.remove(mplayerLog)
-    
-    # Set color
-    colorRGB = [0, 0, 0]
+    if pid > 0 and os.path.exists(mplayer_log):
+        os.remove(mplayer_log)
     
     # Turn Chainable RGB LED off
-    grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
+    color_rgb = [0, 0, 0]
+    grovepi.storeColor(color_rgb[0], color_rgb[1], color_rgb[2])
+    grovepi.chainableRgbLed_pattern(rgbLEDPort, thisLedOnly, 0)
 
 
 # AFN360 procedure, play and stop
 def start_radio(channel, doPlay):
-    global colorRGB
+    global color_rgb
     
     # create lock file
-    f = open(LockFile2, 'w')
+    f = open(lock_file2, 'w')
     f.close()
     
     if doPlay == 1:
@@ -212,16 +218,16 @@ def start_radio(channel, doPlay):
         
         if channel > 5:
             channel = 1
-            #t.start()
-        #else:
-            #t.cancel()
+        #     radio_timer.start()
+        # else:
+        #     radio_timer.cancel()
         
         # Turn Chainable RGB LED on
         x = (channel * 21) / 100.0
         (r, g, b) = generate_rgb_color(x)
-        colorRGB = [r, g, b]
+        color_rgb = [r, g, b]
         grovepi.storeColor(r, g, b)
-        grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
+        grovepi.chainableRgbLed_pattern(rgbLEDPort, thisLedOnly, 0)
         print('====> color: %d, %d, %d') % (r, g, b)
         
         # If not found mplayer, run mplayer.
@@ -229,31 +235,33 @@ def start_radio(channel, doPlay):
         if channel == 0:
             # Bad script. But anti zombie process.
             cmd = "nohup sh -c \"rtmpdump --live -r %s" \
-                    " | mplayer -novideo -af volnorm=2:%s - > /dev/null 2>&1\"" \
-                    " > /dev/null 2>&1 &" % (radioChannels[channel], vol_agqr)
+              " | mplayer -novideo -af volnorm=2:%s - > /dev/null 2>&1\"" \
+              " > /dev/null 2>&1 &" % (radioChannels[channel], vol_agqr)
             subprocess.call(cmd, shell=True)
         else:
             # Bad script. But anti zombie process.
             if channel == 1:
-                cmd = "nohup mplayer -af volnorm=2:%s %s > /dev/null 2>&1 &" % (vol_tko, radioChannels[channel])
+                cmd = "nohup mplayer -af volnorm=2:%s %s" \
+                  " > /dev/null 2>&1 &" % (vol_tko, radioChannels[channel])
             else:
-                cmd = "nohup mplayer -af volnorm=2:%s %s > /dev/null 2>&1 &" % (vol_norm, radioChannels[channel])
+                cmd = "nohup mplayer -af volnorm=2:%s %s" \
+                  " > /dev/null 2>&1 &" % (vol_norm, radioChannels[channel])
             subprocess.call(cmd, shell=True)
-            #subprocess.Popen(
-            #    cmd.split(),
-            #    stdout=open('/dev/null', 'w'),
-            #    stderr=open(mplayerLog, 'a'),
-            #    preexec_fn=os.setpgrp
-            #    )
+            # subprocess.Popen(
+            #     cmd.split(),
+            #     stdout=open('/dev/null', 'w'),
+            #     stderr=open(mplayer_log, 'a'),
+            #     preexec_fn=os.setpgrp
+            #     )
     else:
         print('====> stop Radio')
         kill_mplayer()
     
     # Remove lock file.
-    os.remove(LockFile2)
+    os.remove(lock_file2)
     
     # Turn feedback LED off
-    grovepi.digitalWrite(feedbackLED, 0)
+    grovepi.digitalWrite(feedbackLEDPort, 0)
 
 
 # check config file and get iCloud API.
@@ -266,8 +274,8 @@ def start_radio(channel, doPlay):
 #weather1 = http://www.tenki.jp/forecast/3/16/
 #weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 def get_config():
-    global WeatherURL1
-    global WeatherURL2
+    global weather_URL1
+    global weather_URL2
     global userid
     global passwd
     
@@ -285,58 +293,59 @@ def get_config():
     assert isinstance(passwd, str)
     
     w1 = parser.get('weatherurls', 'weather1')
-    if not w1 == '':
-        WeatherURL1 = w1
-        assert isinstance(WeatherURL1, str)
+    if w1:
+        weather_URL1 = w1
+        assert isinstance(weather_URL1, str)
     else:
-        assert isinstance(WeatherURL1, str)
+        assert isinstance(weather_URL1, str)
     
     w2 = parser.get('weatherurls', 'weather2')
-    if not w2 == '':
-        WeatherURL2 = w2
-        assert isinstance(WeatherURL2, str)
+    if w2:
+        weather_URL2 = w2
+        assert isinstance(weather_URL2, str)
     else:
-        assert isinstance(WeatherURL2, str)
-    
-    print('====> Have read config.')
+        assert isinstance(weather_URL2, str)
 
 
 # get iCloud Calendar data.
 def get_iccdata():
     api = PyiCloudService(userid, passwd)
     
-    if api == '':
+    if api:
+        d = datetime.datetime.today()
+        from_dt = datetime.datetime(d.year, d.month, d.day)
+        to_dt = datetime.datetime(d.year, d.month, d.day)
+        iccEvents = api.calendar.events(from_dt, to_dt)
+        
+        return iccEvents
+    else:
         print('====> api is null.')
-        quit()
-    
-    d = datetime.datetime.today()
-    from_dt = datetime.datetime(d.year, d.month, d.day)
-    to_dt = datetime.datetime(d.year, d.month, d.day)
-    iccEvents = api.calendar.events(from_dt, to_dt)
-    
-    return iccEvents
+        return None
 
 
 # Get Weather Info 1
 def get_weatherinfo1(url):
-    htmlTagPattern = re.compile(r'<[^>]*?>') # remove html tag pattern
+    htmlTagPattern = re.compile(r'<[^>]*?>')
 
     # Get HTML strings
     req = requests.get(url)
-    html = req.text
-    strPattern = r'<h2 class="sub_title">(.*)</p>'
-    matches = re.finditer(strPattern, html)
+    htmlString = req.text
+    delStrPattern = r'<h2 class="sub_title">(.*)</p>'
+    matches = re.finditer(delStrPattern, htmlString)
     
     for match in matches:
         w = htmlTagPattern.sub('', match.groups()[0])
     
-    return w
+    if w:
+        return w
+    else:
+        return None
 
 
 # Get Weather Info 2
 def get_weatherinfo2(url):
     info = []
-    htmlTagPattern = re.compile(r'<[^>]*?>') # remove html tag pattern
+    htmlTagPattern = re.compile(r'<[^>]*?>')
     
     # Get HTML strings of today's weather
     req = requests.get(url)
@@ -350,25 +359,27 @@ def get_weatherinfo2(url):
     matches = re.finditer(tempPattern, todaysHtml)
     info.append(u'気温')
     
+    # In this step info[] has began following,
+    # [気温, N度, N度]
     for match in matches:
         tempN = htmlTagPattern.sub('', match.groups()[0])
         info.append(tempN + u'度')
-        # In this step info[] has began following,
-        # [気温, N度, N度]
     
     # Get chance of rain.
     rainPattern = ur'<td>(.*)</td>'
     matches = re.finditer(rainPattern, todaysHtml)
     info.append(u'降水確率')
     
+    # In this step info[] has began following,
+    # [気温, N度, N度, 降水確率, N%, N%, N%, N%]
     for match in matches:
         rainN = htmlTagPattern.sub('', match.groups()[0])
         if rainN == '---':
             rainN = u'なし'
         info.append(rainN)
-        # In this step info[] has began following,
-        # [気温, N度, N度, 降水確率, N%, N%, N%, N%]
     
+    # Finally info[] has began following,
+    # [気温,最高,N度,最低,N度,降水確率,0時6時,N%,6時12時,N%,12時18時,N%,18時24時,N%]
     if len(info) == 8:
         info.insert(1, u'最高気温')
         info.insert(3, u'最低気温')
@@ -376,10 +387,9 @@ def get_weatherinfo2(url):
         info.insert(8, u'6時12時')
         info.insert(10, u'12時18時')
         info.insert(12, u'18時24時')
-        # Finally info[] has began following,
-        # [気温, 最高, N度, 最低, N度, 降水確率, 0時6時, N%, 6時12時, N%, 12時18時, N%, 18時24時, N%]
-    
-    return info
+        return info
+    else:
+        return None
 
 
 #
@@ -425,22 +435,22 @@ def loop_day(e):
 # speak events.
 def speak_events():
     # create lock file
-    f = open(LockFile1, 'w')
+    f = open(lock_file1, 'w')
     f.close()
     
     # Get config
     get_config()
     
     # Speak Weather 1
-    WeatherInfo1 = get_weatherinfo1(WeatherURL1)
-    if not len(WeatherInfo1) == 0:
+    WeatherInfo1 = get_weatherinfo1(weather_URL1)
+    if WeatherInfo1:
         cmd = speaker + ' 130 "' + WeatherInfo1 + '"'
         subprocess.call(cmd.split(), shell=False)
         time.sleep(1)
     
     # Speak Weather 2
-    WeatherInfo2 = get_weatherinfo2(WeatherURL2)
-    if not len(WeatherInfo2) == 0:
+    WeatherInfo2 = get_weatherinfo2(weather_URL2)
+    if WeatherInfo2:
         for info in WeatherInfo2:
             cmd = speaker + ' 100 "' + info + '"'
             subprocess.call(cmd.split(), shell=False)
@@ -449,30 +459,29 @@ def speak_events():
     
     # Speak Events
     events = get_iccdata()
-    if len(events) == 0:
-        # 一日分のイベントが空
-        talk = u'本日の予定はありません。以上'
-        cmd = speaker + ' 120 "' + talk + '"'
-        subprocess.call(cmd.split(), shell=False)
-    else:
+    if events:
         events2 = sorted(events, key=lambda x:x['startDate']) # sort startDate
         loop_day(events2)
         endTalk = u'忘れ物はありませんか。以上'
         cmd = speaker + ' 100 "' + endTalk + '"'
         subprocess.call(cmd.split(), shell=False)
+    else:
+        # 一日分のイベントが空
+        talk = u'本日の予定はありません。以上'
+        cmd = speaker + ' 120 "' + talk + '"'
+        subprocess.call(cmd.split(), shell=False)
     
     # Remove lock file.
-    os.remove(LockFile1)
+    os.remove(lock_file1)
     
     # Turn feedback LED off
-    grovepi.digitalWrite(feedbackLED, 0)
+    grovepi.digitalWrite(feedbackLEDPort, 0)
 
 
 def return_color():
-    global colorRGB
-    
-    grovepi.storeColor(colorRGB[0], colorRGB[1], colorRGB[2])
-    grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
+    global color_rgb
+    grovepi.storeColor(color_rgb[0], color_rgb[1], color_rgb[2])
+    grovepi.chainableRgbLed_pattern(rgbLEDPort, thisLedOnly, 0)
 
 
 class MyThreading(object):
@@ -482,25 +491,26 @@ class MyThreading(object):
         self._args = args
         self._kwargs = kwargs
     def start(self):
-        t = threading.Timer(self._interval, self._function, *self._args, **self._kwargs)
+        t = threading.Timer(
+                self._interval,
+                self._function,
+                *self._args,
+                **self._kwargs
+                )
         t.start()
 
 
 # main
 if __name__ == '__main__':
     # Init LED
-    grovepi.digitalWrite(feedbackLED, 0)
+    grovepi.digitalWrite(feedbackLEDPort, 0)
     
     # Init Chainable RGB LED
-    grovepi.chainableRgbLed_init(rgbLED, numLEDs)
-    
-    # Init Grove Encoder
-    atexit.register(grovepi.encoder_dis)
-    grovepi.encoder_en()
+    grovepi.chainableRgbLed_init(rgbLEDPort, num_of_leds)
     
     # Create threading object
-    #t = threading.Timer(3600, kill_mplayer)
-    thread_led = MyThreading(40, return_color, ())
+    # radio_timer = MyThreading(3600, kill_mplayer)
+    led_timer = MyThreading(40, return_color, ())
     
     # Init mplayer
     kill_mplayer()
@@ -508,19 +518,17 @@ if __name__ == '__main__':
     # start up blink
     startup_blink = [7,6,5,4,3,2,1,0]
     for i in startup_blink:
-        grovepi.chainableRgbLed_test(rgbLED, numLEDs, i)
+        grovepi.chainableRgbLed_test(rgbLEDPort, num_of_leds, i)
         time.sleep(.1)
     
     [new_val, encoder_val] = grovepi.encoderRead()
     
-    if not new_val == 0:
-        colorRGB = [255, 0, 0]
-        grovepi.storeColor(colorRGB[0], colorRGB[1], colorRGB[2])
-        grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
-    #else:
-    #    colorRGB = [0, 255, 0]
-    #    grovepi.storeColor(colorRGB[0], colorRGB[1], colorRGB[2])
-    #    grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
+    if new_val == 0:
+        color_rgb = [0, 0, 0]
+    else:
+        color_rgb = [255, 0, 0]
+        grovepi.storeColor(color_rgb[0], color_rgb[1], color_rgb[2])
+        grovepi.chainableRgbLed_pattern(rgbLEDPort, thisLedOnly, 0)
     
     while True:
         try:
@@ -529,35 +537,39 @@ if __name__ == '__main__':
                 [new_val, encoder_val] = grovepi.encoderRead()
                 if new_val:
                     print('====> Encoder: %d') % encoder_val
-                    if not os.path.exists(LockFile2):
+                    if os.path.exists(lock_file2):
+                        print('====> Locking...')
+                    else:
                         start_radio(encoder_val, radio_on)
             
-            # Button iCloud Calendar
-            if grovepi.digitalRead(icloudBtn) == 1:
-                print('====> Button: D%d') % icloudBtn
+            # Button for speaking self iCloud Calendar
+            if grovepi.digitalRead(icloudBtnPort) == 1:
+                print('====> Button: D%d') % icloudBtnPort
                 
                 # Turn feedback LED on
-                grovepi.digitalWrite(feedbackLED, 1)
+                grovepi.digitalWrite(feedbackLEDPort, 1)
                 
                 # Run speak_events
-                if not os.path.exists(LockFile1):
-                    speak_events()
-                else:
+                if os.path.exists(lock_file1):
                     print('====> Locking...')
+                else:
+                    speak_events()
             
-            # Button Radio
-            if grovepi.digitalRead(radioBtn) == 1:
-                print('====> Button: D%d') % radioBtn
+            # Button for turning Radio on/off
+            if grovepi.digitalRead(radioBtnPort) == 1:
+                print('====> Button: D%d') % radioBtnPort
                 
                 # Turn feedback LED on
-                grovepi.digitalWrite(feedbackLED, 1)
+                grovepi.digitalWrite(feedbackLEDPort, 1)
                 
                 # Detect mplayer
                 radio_on = detect_mplayer()
                 print('====> radio_on: %d') % radio_on
                 
                 # Run internet radio
-                if not os.path.exists(LockFile2):
+                if os.path.exists(lock_file2):
+                    print('========> Locking...')
+                else:
                     if radio_on == 0:
                         [new_val, encoder_val] = grovepi.encoderRead()
                         print('========> Encoder: %d') % encoder_val
@@ -566,23 +578,24 @@ if __name__ == '__main__':
                     else:
                         radio_on = 0
                         start_radio(0, radio_on)
-                else:
-                    print('========> Locking...')
             
-            # Button RGB LED
-            if grovepi.digitalRead(lightBtn) == 1:
-                print('====> Button: D%d') % lightBtn
+            # Button for blinking RGB LED
+            if grovepi.digitalRead(lightBtnPort) == 1:
+                print('====> Button: D%d') % lightBtnPort
                 grovepi.storeColor(255, 255, 255)
-                grovepi.chainableRgbLed_pattern(rgbLED, thisLedOnly, 0)
-                thread_led.start()
+                grovepi.chainableRgbLed_pattern(rgbLEDPort, thisLedOnly, 0)
+                led_timer.start()
             
+            # Loop interval time
             time.sleep(sleep_time)
         
         except KeyboardInterrupt:
             print('====> ctrl + c')
-            grovepi.chainableRgbLed_test(rgbLED, numLEDs, testColorBlack)
-            grovepi.digitalWrite(feedbackLED, 0)
-            #t.cancel()
+            color_rgb = [0, 0, 0]
+            grovepi.storeColor(color_rgb[0], color_rgb[1], color_rgb[2])
+            grovepi.chainableRgbLed_pattern(rgbLEDPort, thisLedOnly, 0)
+            grovepi.digitalWrite(feedbackLEDPort, 0)
             quit()
+        
         except IOError:
             print('====> IO Error.')

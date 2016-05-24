@@ -14,12 +14,12 @@
 
 export USER='pi'
 eval cd ~$USER
-MY_PID="`ps axw | pgrep -f speakEvents.py`"
 
-set -eu
+#set -eu
 
 do_start() {
     # if it's start, then start vncserver using the details below
+    MY_PID="`ps axw | pgrep -f speakEvents.py`"
     if [ "${MY_PID:-null}" = null ]; then
         echo "Starting spaekEvents for $USER..."
         su $USER -c 'nohup /home/pi/bin/speakEvents/speakEvents.py > /dev/null 2>&1 &'
@@ -32,6 +32,7 @@ do_start() {
 
 do_stop() {
     # if it's stop, then just kill the process
+    MY_PID="`ps axw | pgrep -f speakEvents.py`"
     if [ "${MY_PID:-null}" != null ]; then
         echo "Stopping spaekEvents for $USER..."
         kill -9 "$MY_PID"
