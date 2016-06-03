@@ -25,6 +25,7 @@ home_dir = os.path.expanduser('~')
 config_file = home_dir + '/.speakevents'
 lock_file1 = '/tmp/speakEventsLockfile1'
 lock_file2 = '/tmp/speakEventsLockfile2'
+lock_file3 = '/tmp/speakEventsLockfile3'
 mplayer_log = '/tmp/speakEventsMpLogfile'
 sleep_time = 0.1
 
@@ -217,7 +218,7 @@ def start_radio(channel, doPlay):
         kill_mplayer()
         
         if channel > 5:
-            channel = 1
+            channel = 2
         #     radio_timer.start()
         # else:
         #     radio_timer.cancel()
@@ -480,8 +481,16 @@ def speak_events():
 
 def return_color():
     global color_rgb
+    
+    # Turn LED off
+    grovepi.digitalWrite(feedbackLEDPort, 0)
+
+    # Turn RGB LED off
     grovepi.storeColor(color_rgb[0], color_rgb[1], color_rgb[2])
     grovepi.chainableRgbLed_pattern(rgbLEDPort, thisLedOnly, 0)
+
+    # Remove lock file.
+    os.remove(lock_file3)
 
 
 class MyThreading(object):
@@ -490,6 +499,7 @@ class MyThreading(object):
         self._function = function
         self._args = args
         self._kwargs = kwargs
+
     def start(self):
         t = threading.Timer(
                 self._interval,
@@ -509,14 +519,14 @@ if __name__ == '__main__':
     grovepi.chainableRgbLed_init(rgbLEDPort, num_of_leds)
     
     # Create threading object
-    # radio_timer = MyThreading(3600, kill_mplayer)
-    led_timer = MyThreading(40, return_color, ())
+    # radio_timer = MyThreading(5400, kill_mplayer)
+    rgbled_timer = MyThreading(40, return_color, ())
     
     # Init mplayer
     kill_mplayer()
     
     # start up blink
-    startup_blink = [7,6,5,4,3,2,1,0]
+    startup_blink = [7,6,5,4,3,2,1,0,7]
     for i in startup_blink:
         grovepi.chainableRgbLed_test(rgbLEDPort, num_of_leds, i)
         time.sleep(.1)
@@ -527,8 +537,9 @@ if __name__ == '__main__':
         color_rgb = [0, 0, 0]
     else:
         color_rgb = [255, 0, 0]
-        grovepi.storeColor(color_rgb[0], color_rgb[1], color_rgb[2])
-        grovepi.chainableRgbLed_pattern(rgbLEDPort, thisLedOnly, 0)
+
+    grovepi.storeColor(color_rgb[0], color_rgb[1], color_rgb[2])
+    grovepi.chainableRgbLed_pattern(rgbLEDPort, thisLedOnly, 0)
     
     while True:
         try:
@@ -582,9 +593,22 @@ if __name__ == '__main__':
             # Button for blinking RGB LED
             if grovepi.digitalRead(lightBtnPort) == 1:
                 print('====> Button: D%d') % lightBtnPort
-                grovepi.storeColor(255, 255, 255)
-                grovepi.chainableRgbLed_pattern(rgbLEDPort, thisLedOnly, 0)
-                led_timer.start()
+
+                # Turn feedback LED on
+                grovepi.digitalWrite(feedbackLEDPort, 1)
+
+                # Run internet radio
+                if os.path.exists(lock_file3):
+                    print('====> Locking...')
+                else:
+                    # create lock file
+                    f = open(lock_file3, 'w')
+                    f.close()
+
+                    # Blink RGB LED
+                    grovepi.storeColor(255, 255, 255)
+                    grovepi.chainableRgbLed_pattern(rgbLEDPort, thisLedOnly, 0)
+                    rgbled_timer.start()
             
             # Loop interval time
             time.sleep(sleep_time)
