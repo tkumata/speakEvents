@@ -41,7 +41,7 @@ AFN のチャンネルは Encoder の...
 
 ## 必要なハード
 1. Raspberry Pi 3
-2. GrovePi+ (IMPORTANT!! Firmware is v1.2.5 over and apply following patch.)
+2. GrovePi+ (IMPORTANT!! Firmware is v1.2.6)
 3. Buttons for Grove (D4, D5, D6)
 4. Chainable RGB LED (D7)
 5. LED (D8)
@@ -53,7 +53,7 @@ AFN のチャンネルは Encoder の...
 2. Python module の pyicloud
 3. テキスト読み上げソフトとして [AquesTalkPi](http://www.a-quest.com/products/aquestalkpi.html) (AquesTalkPi なら日本語も喋ってくれるし、英語もアルファベット読みにならないので。)
 4. Wrapper for AquesTalkPi (eg, atalk.sh) (AquesTalkPi は wav を作るだけなので aplay で再生するようにラッパを作成する必要があります。)
-5. Firmware which patched v1.2.5 or patched v1.2.6.
+5. GrovePi+ Firmware v1.2.6.
 
 
 ## 導入
@@ -104,9 +104,11 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 ```
 
 
-* Firmware patch for v1.2.6
+* ~~~Firmware patch for v1.2.6~~~
 
-Encoder と Chainable RGB LED を同時に使うにはファームウェアにパッチ当てないといけません。パッチは私が作ったものでちゃんとした検証をしていませんのでご留意ください。「Encoder 使わないよ」と言う場合はファームウェアをいじらなくてもいいです。また、Encoder だけ使う場合はパッチを当てない v1.2.5 以上が必要です。
+私の pull request が通りました。公式の Firmware v1.2.6 で大丈夫です。
+
+~~~Encoder と Chainable RGB LED を同時に使うにはファームウェアにパッチ当てないといけません。パッチは私が作ったものでちゃんとした検証をしていませんのでご留意ください。「Encoder 使わないよ」と言う場合はファームウェアをいじらなくてもいいです。また、Encoder だけ使う場合はパッチを当てない v1.2.5 以上が必要です。~~~
 
 
 
@@ -117,11 +119,15 @@ $ sudo pip install ino
 $ mkdir firmware && cd firmware
 $ ino init
 $ rm src/sketch.ino
+~~~$ cp -a ~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/* src/~~~
 $ cp -a ~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/* src/
 (in this step apply patch.)
 $ ino list-models
 $ ino build -m atmega328
 $ cd .build/atmega328
+$ avrdude -c gpio -p m328p -U lfuse:w:0xFF:m
+$ avrdude -c gpio -p m328p -U hfuse:w:0xDA:m
+$ avrdude -c gpio -p m328p -U efuse:w:0x05:m
 $ avrdude -c gpio -p m328p -U flash:w:firmware.hex
 ```
 
