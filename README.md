@@ -104,11 +104,11 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 ```
 
 
-* ~~~Firmware patch for v1.2.6~~~
+* ~~Firmware patch for v1.2.6~~
 
 私の pull request が通りました。公式の Firmware v1.2.6 で大丈夫です。
 
-~~~Encoder と Chainable RGB LED を同時に使うにはファームウェアにパッチ当てないといけません。パッチは私が作ったものでちゃんとした検証をしていませんのでご留意ください。「Encoder 使わないよ」と言う場合はファームウェアをいじらなくてもいいです。また、Encoder だけ使う場合はパッチを当てない v1.2.5 以上が必要です。~~~
+~~Encoder と Chainable RGB LED を同時に使うにはファームウェアにパッチ当てないといけません。パッチは私が作ったものでちゃんとした検証をしていませんのでご留意ください。「Encoder 使わないよ」と言う場合はファームウェアをいじらなくてもいいです。また、Encoder だけ使う場合はパッチを当てない v1.2.5 以上が必要です。~~
 
 
 
@@ -119,7 +119,7 @@ $ sudo pip install ino
 $ mkdir firmware && cd firmware
 $ ino init
 $ rm src/sketch.ino
-~~~$ cp -a ~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/* src/~~~
+~~$ cp -a ~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/* src/~~
 $ cp -a ~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/* src/
 (in this step apply patch.)
 $ ino list-models
@@ -133,11 +133,11 @@ $ avrdude -c gpio -p m328p -U flash:w:firmware.hex
 
 
 ## 予定
-- ~~~ロータリーかスライダーで AFN のチャンネルを選択できるようにしたい。~~~
+- ~~ロータリーかスライダーで AFN のチャンネルを選択できるようにしたい。~~
 - 折角の RPi3 なので BLE でコントロールできるようにしたい。
 - ニュースヘッドラインも追加したい。
-- ~~~AFN 以外のネットラジオも追加したい。~~~
-- ~~~色。~~~
+- ~~AFN 以外のネットラジオも追加したい。~~
+- ~~色。~~
 
 
 ## 過去の版
