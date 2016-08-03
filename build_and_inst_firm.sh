@@ -9,8 +9,8 @@ read -n1 -p "Do you execute this? [y/N]: " ans
 echo
 WORK_DIRNAME="firm126"
 CURRENT_DIRNAME=${PWD##*/}
-SRC_DIR="~/work/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6"
-#SRC_DIR="~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6"
+#SRC_DIR="~/work/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6"
+SRC_DIR="~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6"
 
 if [ "$ans" = "y" -o "$ans" = "Y" ]; then
     i=6
@@ -33,7 +33,11 @@ if [ "$ans" = "y" -o "$ans" = "Y" ]; then
 
         echo "Installing firmware"
         cd .build/atmega328
+        avrdude -c gpio -p m328p -U lfuse:w:0xFF:m
+        avrdude -c gpio -p m328p -U hfuse:w:0xDA:m
+        avrdude -c gpio -p m328p -U efuse:w:0x05:m
         avrdude -c gpio -p m328p -U flash:w:firmware.hex
+
         if [ "$?" -eq 0 ]; then
             echo "Finished."
             echo "Then reboot after 5 sec."
