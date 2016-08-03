@@ -43,7 +43,7 @@ passwd = ''
 radio_on = 0
 
 # Normalized sound volume
-vol_agqr = 0.04
+vol_agqr = 0.05
 vol_tko = 0.20
 vol_norm = 0.75
 
