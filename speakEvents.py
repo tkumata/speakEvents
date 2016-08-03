@@ -43,9 +43,9 @@ passwd = ''
 radio_on = 0
 
 # Normalized sound volume
-vol_agqr = 0.03
-vol_tko = 0.01
-vol_norm = 0.60
+vol_agqr = 0.04
+vol_tko = 0.20
+vol_norm = 0.75
 
 # Init RGB LED's color
 color_rgb = [0, 255, 0]
