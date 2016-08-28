@@ -13,6 +13,9 @@ CURRENT_DIRNAME=${PWD##*/}
 SRC_DIR="~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6"
 
 if [ "$ans" = "y" -o "$ans" = "Y" ]; then
+    sudo apt-get update
+    sudo apt-get -y upgrade
+
     i=6
 
     if [ "$CURRENT_DIRNAME" = "$WORK_DIRNAME" ]; then
