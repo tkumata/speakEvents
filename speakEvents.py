@@ -44,7 +44,7 @@ radio_on = 0
 
 # Normalized sound volume
 vol_agqr = 0.05
-vol_tko = 0.20
+vol_tko = 0.25
 vol_norm = 0.75
 
 # Init RGB LED's color
@@ -533,7 +533,7 @@ if __name__ == '__main__':
     
     [new_val, encoder_val] = grovepi.encoderRead()
     
-    if new_val == 0:
+    if encoder_val == 0:
         color_rgb = [0, 0, 0]
     else:
         color_rgb = [255, 0, 0]
