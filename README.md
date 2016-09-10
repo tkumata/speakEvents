@@ -104,16 +104,17 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 ```
 
 
-* ~~Firmware patch for v1.2.6~~
+* Firmware patch for v1.2.6
 
-私の pull request が通りました。公式の Firmware v1.2.6 で大丈夫です。しかしそれでも自分でファームウェアをビルドしたい場合は以下をご参照ください。
+私の pull request が通りました。公式の Firmware v1.2.6 で大丈夫です。しかしそれでも自分でファームウェアを作りたい場合は以下をご参照ください。
 
 * Compile firmware v1.2.6 and install
 
-Raspbian for Robots jessie includes Arduino IDE 1.6.0. But ino can run only Arduino 1.0.x so you shuold compile firmware by Arduino IDE 1.6.0.
+Raspbian for Robots jessie includes Arduino IDE 1.6.0. But ino can run on only Arduino 1.0.x so you shuold compile firmware by Arduino IDE 1.6.0.
 ```
-1. vi .arduino15/preference.txt and add following line.
+1. vi /home/pi/.arduino15/preferences.txt and add following line.
 build.path=/home/pi/Arduino/temp
+
 2. Open Arduino IDE 1.6.0
 3. Open directory (/home/pi/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6)
 4. Verify/Compile
@@ -123,8 +124,8 @@ build.path=/home/pi/Arduino/temp
 
 If you want to use Arduino IDE 1.6.11 so you should select boards version 1.6.11.
 ```
-1. Open Arduin IDE 1.6.11
-2. Open Boards Manager
+1. Open Arduino IDE 1.6.11
+2. Open "Boards Manager"
 3. Install "Arduino AVR Boards by Arduino version 1.6.11". DO NOT select 1.6.12 or 1.6.13.
 4. Open directory /home/pi/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6
 5. Export compiled binary
