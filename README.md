@@ -106,29 +106,29 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 
 * ~~Firmware patch for v1.2.6~~
 
-私の pull request が通りました。公式の Firmware v1.2.6 で大丈夫です。
-
-~~Encoder と Chainable RGB LED を同時に使うにはファームウェアにパッチ当てないといけません。パッチは私が作ったものでちゃんとした検証をしていませんのでご留意ください。「Encoder 使わないよ」と言う場合はファームウェアをいじらなくてもいいです。また、Encoder だけ使う場合はパッチを当てない v1.2.5 以上が必要です。~~
-
-
+私の pull request が通りました。公式の Firmware v1.2.6 で大丈夫です。しかしそれでも自分でファームウェアをビルドしたい場合は以下をご参照ください。
 
 * Compile firmware v1.2.6 and install
-
+Raspbian for Robots jessie から Arduino IDE 1.6.0 が同梱されました。ino は Arduino 1.0.x じゃないと使えないので Arduino IDE 1.6.0 で firmware を build します。
 ```
-$ sudo pip install ino
-$ mkdir firmware && cd firmware
-$ ino init
-$ rm src/sketch.ino
-~~$ cp -a ~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/* src/~~
-$ cp -a ~/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6/* src/
-(in this step apply patch.)
-$ ino list-models
-$ ino build -m atmega328
-$ cd .build/atmega328
-$ avrdude -c gpio -p m328p -U lfuse:w:0xFF:m
-$ avrdude -c gpio -p m328p -U hfuse:w:0xDA:m
-$ avrdude -c gpio -p m328p -U efuse:w:0x05:m
-$ avrdude -c gpio -p m328p -U flash:w:firmware.hex
+1. vi .arduino15/preference.txt and add following line.
+build.path=/home/pi/Arduino/temp
+2. Open Arduino IDE 1.6.0
+3. Open directory (/home/pi/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6)
+4. Verify/Compile
+5. cd /home/pi/Arduino/temp
+6. avrdude -c gpio -p m328p -U flash:w:grove_pi_v1_2_6.cpp.hex
+```
+
+Arduino IDE 1.6.11 でもコンパイル可能ですが、ボードバージョンが新しいと GrovePi が動きません。
+```
+1. Open Arduin IDE 1.6.11
+2. Open Boards Manager
+3. Install Arduino AVR Boards by Arduino version 1.6.11. DONOT selecet 1.6.12 or 1.6.13.
+4. Open directory /home/pi/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6
+5. Export compiled binary
+6. cd /home/pi/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6
+7. avrdude -c gpio -p m328p -U flash:w:grove_pi_v1_2_6.ino.standard.hex
 ```
 
 
