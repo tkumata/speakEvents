@@ -32,7 +32,7 @@ AFN のチャンネルは Encoder の...
 | 3    | Power Talk | 何か一意な色 | None  |
 | 4    | The Voice  | 何か一意な色 | None  |
 | 5    | Freedom    | 何か一意な色 | None  |
-| 6-24 | Joe Radio  | 何か一意な色 | ~~one hour~~ |
+| 6-24 | Joe Radio  | 何か一意な色 | |
 
 となります。色は配列の順番を種として特定のアルゴリズムで一意な色を自動的に生成されます。
 
@@ -109,7 +109,8 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 私の pull request が通りました。公式の Firmware v1.2.6 で大丈夫です。しかしそれでも自分でファームウェアをビルドしたい場合は以下をご参照ください。
 
 * Compile firmware v1.2.6 and install
-Raspbian for Robots jessie から Arduino IDE 1.6.0 が同梱されました。ino は Arduino 1.0.x じゃないと使えないので Arduino IDE 1.6.0 で firmware を build します。
+
+Raspbian for Robots jessie includes Arduino IDE 1.6.0. But ino can run only Arduino 1.0.x so you shuold compile firmware by Arduino IDE 1.6.0.
 ```
 1. vi .arduino15/preference.txt and add following line.
 build.path=/home/pi/Arduino/temp
@@ -120,11 +121,11 @@ build.path=/home/pi/Arduino/temp
 6. avrdude -c gpio -p m328p -U flash:w:grove_pi_v1_2_6.cpp.hex
 ```
 
-Arduino IDE 1.6.11 でもコンパイル可能ですが、ボードバージョンが新しいと GrovePi が動きません。
+If you want to use Arduino IDE 1.6.11 so you should select boards version 1.6.11.
 ```
 1. Open Arduin IDE 1.6.11
 2. Open Boards Manager
-3. Install Arduino AVR Boards by Arduino version 1.6.11. DONOT selecet 1.6.12 or 1.6.13.
+3. Install "Arduino AVR Boards by Arduino version 1.6.11". DO NOT select 1.6.12 or 1.6.13.
 4. Open directory /home/pi/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6
 5. Export compiled binary
 6. cd /home/pi/Desktop/GrovePi/Firmware/Source/v1.2/grove_pi_v1_2_6
@@ -133,14 +134,12 @@ Arduino IDE 1.6.11 でもコンパイル可能ですが、ボードバージョ�
 
 
 ## 予定
-- ~~ロータリーかスライダーで AFN のチャンネルを選択できるようにしたい。~~
 - 折角の RPi3 なので BLE でコントロールできるようにしたい。
 - ニュースヘッドラインも追加したい。
-- ~~AFN 以外のネットラジオも追加したい。~~
-- ~~色。~~
 
 
 ## 過去の版
+- [wheezy](https://github.com/tkumata/speakEvents/tree/wheezy)
 - [ver2](https://github.com/tkumata/speakEvents/tree/ver2x)
 - [ver1](https://github.com/tkumata/speakEvents/tree/ver1x)
 
