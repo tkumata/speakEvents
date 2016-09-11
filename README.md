@@ -110,7 +110,8 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 
 * Compile firmware v1.2.6 and install
 
-Raspbian for Robots jessie includes Arduino IDE 1.6.0. But ino can run on only Arduino 1.0.x so you shuold compile firmware by Arduino IDE 1.6.0.
+Raspbian for Robots jessie contains Arduino IDE 1.6.0. But ino can run on only Arduino 1.0.x so you shuold compile firmware by Arduino IDE 1.6.0.
+
 ```
 1. vi /home/pi/.arduino15/preferences.txt and add following line.
 build.path=/home/pi/Arduino/temp
@@ -123,6 +124,7 @@ build.path=/home/pi/Arduino/temp
 ```
 
 If you want to use Arduino IDE 1.6.11 so you should select boards version 1.6.11.
+
 ```
 1. Open Arduino IDE 1.6.11
 2. Open "Boards Manager"
