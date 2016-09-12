@@ -1,13 +1,14 @@
 # ゆっくりが予定や天気情報を喋ったり、AFN 360 を再生したりする IoT
 
 
-## 説明
+## Description
+
 Raspberry Pi 3 (以下 RPi3) に BLE やボタンなどから何かしらの入力があった時、以下のことをします。
 
-- tenki.jp の天気情報を音声でお知らせ
-- iCloud 内の当日の全予定を音声でお知らせ
-- AFN 360 の再生 (RGB LED でチャンネル毎に色を変える)
-- RGB LED を 40 秒点灯 (暗い部屋用の一時的なトーチ)
+ - tenki.jp の天気情報を音声でお知らせ
+ - iCloud 内の当日の全予定を音声でお知らせ
+ - AFN 360 の再生 (RGB LED でチャンネル毎に色を変える)
+ - RGB LED を 40 秒点灯 (暗い部屋用の一時的なトーチ)
 
 音声なので忙しい場合でも、何かしながら予定の確認ができます。
 
@@ -39,7 +40,8 @@ AFN のチャンネルは Encoder の...
 [![the thing](images/IMG0047.png)](images/IMG0054.m4v)
 
 
-## 必要なハード
+## Hardware
+
 1. Raspberry Pi 3
 2. GrovePi+ (IMPORTANT!! Firmware is v1.2.6)
 3. Buttons for Grove (D4, D5, D6)
@@ -48,7 +50,8 @@ AFN のチャンネルは Encoder の...
 6. Encoder (D2) (IMPORTANT!! Grove Encoder works on D2 port only.)
 
 
-## 必要なソフト
+## Software
+
 1. OS として [Raspbian for Robots](http://www.dexterindustries.com/howto/install-raspbian-for-robots-image-on-an-sd-card/) (RPi3 と素の Raspbian の組み合わせだと Grove の反応が超絶イマイチで、粗悪品のボタンを掴んだか？って勘違いするほどです。ハマりました。2016/04/12 時点で GrovePi+ と RPi3 の組み合わせを使うなら OS は Raspbian for Robots がオススメです。RPi2 は分かりません。)
 2. Python module の pyicloud
 3. テキスト読み上げソフトとして [AquesTalkPi](http://www.a-quest.com/products/aquestalkpi.html) (AquesTalkPi なら日本語も喋ってくれるし、英語もアルファベット読みにならないので。)
@@ -56,7 +59,8 @@ AFN のチャンネルは Encoder の...
 5. GrovePi+ Firmware v1.2.6.
 
 
-## 導入
+## Installation
+
 1. Setup [Raspbian for Robots](http://www.dexterindustries.com/howto/install-raspbian-for-robots-image-on-an-sd-card/).
 2. sudo pip install pyicloud
 3. Download [AquesTalkPi](http://www.a-quest.com/products/aquestalkpi.html) and unzip.
@@ -69,10 +73,11 @@ AFN のチャンネルは Encoder の...
 10. sudo /etc/init.d/speakEventsService.sh start
 
 
-## その他
-* example atalk.sh
+## Notes
 
-AquesTalkPi が作った wav データを再生する wrapper の例です。
+### atalk.sh
+
+This is example of wrapper script which plays wav file which AquesTalkPi makes.
 
 ```
 #!/bin/bash
@@ -89,9 +94,9 @@ fi
 ```
 
 
-* /home/pi/.speakevents format
+### .speakevents Format
 
-pyicloud を使うための設定ファイルの形式です。天気情報は tenki.jp のみ対応しています。
+This is format of config file which pyicloud uses. This program supports only tenki.jp as weather information.
 
 ```
 [account]
@@ -104,11 +109,11 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 ```
 
 
-* Firmware patch for v1.2.6
+### Firmware patch for v1.2.6
 
-私の pull request が通りました。公式の Firmware v1.2.6 で大丈夫です。しかしそれでも自分でファームウェアを作りたい場合は以下をご参照ください。
+I am happy to my pull request was allowed. So this program works on public firmware v1.2.6. However if you want to build firmware yourself, please see following. At your own risk.
 
-* Compile firmware v1.2.6 and install
+### Compile firmware v1.2.6 and install
 
 Raspbian for Robots jessie contains Arduino IDE 1.6.0. But ino can run on only Arduino 1.0.x so you shuold compile firmware by Arduino IDE 1.6.0.
 
@@ -136,20 +141,23 @@ If you want to use Arduino IDE 1.6.11 so you should select boards version 1.6.11
 ```
 
 
-## 予定
-- 折角の RPi3 なので BLE でコントロールできるようにしたい。
-- ニュースヘッドラインも追加したい。
+## Hope
+
+- I hope that I controll functions by RPi3 built-in BLE instead of physical bottoms.
+- I hope add function that speaks news headline.
 
 
-## 過去の版
+## Other Version
+
 - [wheezy](https://github.com/tkumata/speakEvents/tree/wheezy)
 - [ver2](https://github.com/tkumata/speakEvents/tree/ver2x)
 - [ver1](https://github.com/tkumata/speakEvents/tree/ver1x)
 
 
-## ライセンス
+## License
+
 MIT
 
 
-## 著者
+## Author
 tkumata
