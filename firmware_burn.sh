@@ -47,7 +47,7 @@ function public_firmware_burn() {
 
 function myself_firmware_burn() {
     WRKDIR="/home/pi/Arduino/temp"
-    HEXNAME="grove_pi_v1_2_6.ino.hex"
+    HEXNAME="grove_pi_v1_2_6.cpp.hex"
 
     echo ""
     cd $WRKDIR
