@@ -7,6 +7,13 @@ echo "No ctrl+c / Yes return key."
 read
 
 function after_burnning() {
+    # check pip grovepi
+    if [ ! "$(pip freeze | grep grovepi)" = "grovepi==0.0.0" ]; then
+        sudo pip uninstall grovepi
+    fi
+
+    echo ""
+
     # install python grovepi library
     sudo python /home/pi/Desktop/GrovePi/Software/Python/setup.py install
 
@@ -37,6 +44,7 @@ function public_firmware_burn() {
     fi
 
     cd Firmware/Source/v1.2/grove_pi_v1_2_6
+
     if [ -f "$HEXNAME" ]; then
         echo "OK"
         avrdude -c gpio -p m328p -U flash:w:"$HEXNAME"
