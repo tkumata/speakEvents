@@ -53,7 +53,7 @@ function public_firmware_burn() {
     after_burnning
 }
 
-function myself_firmware_burn() {
+function self_firmware_burn() {
     WRKDIR="/home/pi/Arduino/temp"
     HEXNAME="grove_pi_v1_2_6.cpp.hex"
 
@@ -66,7 +66,7 @@ function myself_firmware_burn() {
 
     if [ -f "$HEXNAME" ]; then
         # burn
-        echo "OK"
+        echo "OK. Hex file exists."
         sudo avrdude -c gpio -p m328p -U flash:w:"$HEXNAME"
     fi
 
@@ -76,13 +76,13 @@ function myself_firmware_burn() {
 echo "Choose a HEX to run:"
 echo =======================
 echo 1. Public firmware v1.2.6
-echo 2. Your building firmware v1.2.6
+echo 2. Self building firmware v1.2.6
 
 read -n1 -p "Select and option:" doit
 case $doit in
     1) public_firmware_burn
     ;;
-    2) myself_firmware_burn
+    2) self_firmware_burn
     ;;
     *) echo Exiting
     ;;
