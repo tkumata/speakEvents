@@ -37,7 +37,7 @@ AFN のチャンネルは Encoder の...
 
 となります。色は配列の順番を種として特定のアルゴリズムで一意な色を自動的に生成されます。
 
-[![the thing](images/IMG0047.png)](images/IMG0054.m4v)
+![the thing](images/IMG0047.png)
 
 
 ## Hardware
