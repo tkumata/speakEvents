@@ -131,6 +131,13 @@ radioChannels = [
     ]
 
 
+#
+def signal_term_handler(signal, frame):
+    print 'got SIGTERM'
+    grovepi.chainableRgbLed_test(pin7, numleds, 0)
+    sys.exit(0)
+
+
 # Create simple color
 def generate_rgb_color(v):
     t1 = math.cos(4 * math.pi * v)
@@ -611,6 +618,7 @@ if __name__ == '__main__':
                     rgbled_timer.start()
             
             # Loop interval time
+            signal.signal(signal.SIGTERM, signal_term_handler)
             time.sleep(sleep_time)
         
         except KeyboardInterrupt:
@@ -622,4 +630,7 @@ if __name__ == '__main__':
             quit()
         
         except IOError:
-            print('====> IO Error.')
+            #print('====> IO Error.')
+            grovepi.digitalWrite(feedbackLEDPort, 1)
+            time.sleep(1)
+            grovepi.digitalWrite(feedbackLEDPort, 0)
