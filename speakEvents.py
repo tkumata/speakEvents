@@ -134,7 +134,7 @@ radioChannels = [
 #
 def signal_term_handler(signal, frame):
     print 'got SIGTERM'
-    grovepi.chainableRgbLed_test(pin7, numleds, 0)
+    kill_mplayer()
     sys.exit(0)
 
 
@@ -548,6 +548,9 @@ if __name__ == '__main__':
     grovepi.storeColor(color_rgb[0], color_rgb[1], color_rgb[2])
     grovepi.chainableRgbLed_pattern(rgbLEDPort, thisLedOnly, 0)
     
+    # recieve SIGTERM
+    signal.signal(signal.SIGTERM, signal_term_handler)
+    
     while True:
         try:
             # Encoder
@@ -618,7 +621,6 @@ if __name__ == '__main__':
                     rgbled_timer.start()
             
             # Loop interval time
-            signal.signal(signal.SIGTERM, signal_term_handler)
             time.sleep(sleep_time)
         
         except KeyboardInterrupt:

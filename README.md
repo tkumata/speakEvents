@@ -113,6 +113,7 @@ weather2 = http://www.tenki.jp/forecast/3/16/4410/13112-daily.html
 
 I am happy to my pull request was allowed. So this program works on public firmware v1.2.6. However if you want to build firmware yourself, please see following. At your own risk.
 
+
 ### Compile firmware v1.2.6 and install
 
 Raspbian for Robots jessie contains Arduino IDE 1.6.0. But ino can run on only Arduino 1.0.x so you shuold compile firmware by Arduino IDE 1.6.0.
