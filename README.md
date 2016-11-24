@@ -33,11 +33,12 @@ AFN のチャンネルは Encoder の...
 | 3    | Power Talk | 何か一意な色 | None  |
 | 4    | The Voice  | 何か一意な色 | None  |
 | 5    | Freedom    | 何か一意な色 | None  |
-| 6-24 | Joe Radio  | 何か一意な色 | |
+| 6-24 | Joe Radio  | 何か一意な色 | None  |
 
 となります。色は配列の順番を種として特定のアルゴリズムで一意な色を自動的に生成されます。
 
 ![the thing](images/IMG0047.png)
+[Demo movie (2.2MB)](images/IMG_0054.mp4)
 
 
 ## Hardware
