@@ -123,10 +123,10 @@ else:
 # Internet Radio channels
 radioChannels = [
     'rtmp://fms-base1.mitene.ad.jp/agqr/aandg22',
-    'http://14023.live.streamtheworld.com/AFNP_TKO',
-    'http://14093.live.streamtheworld.com/AFN_JOE',
-    'http://4533.live.streamtheworld.com/AFN_PTK',
-    'http://6073.live.streamtheworld.com/AFN_VCE',
+    'http://15363.live.streamtheworld.com/AFNP_TKO.mp3',
+    'http://19393.live.streamtheworld.com/AFN_JOEP.mp3',
+    'http://18813.live.streamtheworld.com/AFN_PTK.mp3',
+    'http://16603.live.streamtheworld.com/AFN_VCE.mp3',
     'http://14963.live.streamtheworld.com/AFN_FRE',
     ]
 
